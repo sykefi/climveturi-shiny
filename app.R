@@ -54,7 +54,8 @@ locations <- c("Vuoksi", "Kymijoki", "Saarijärven reitti", "Rautalammin reitti"
                "Kalajoki", "Pyhäjoki", "Siikajoki","Ala-Oulujoki",
                "Ontojärvi-Lentua","Iijoki", "Simojoki",
                "Ala-Kemijoki","Ylä-Ounasjoki", "Kitinen", 
-               "Tornionjoki-Muonionjoki","Teno", "Paatsjoki")
+               "Tornionjoki-Muonionjoki","Teno", "Paatsjoki") %>%
+  sort()
 
 timeframe_names <- c("2010-2039", "2040-2069") # 1, 2
 scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo") # 1, 2, 3
