@@ -27,6 +27,7 @@ require(ggplot2)
 require(dplyr)
 require(lubridate)
 require(reshape2)
+require(DT)
 
 
 
@@ -38,6 +39,8 @@ setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 # Plots
 ref_list <- readRDS("data/ref_list.rds")
 scen_list <- readRDS("data/scen_list.rds")
+change <- read.csv('data/vesisto_muutos_long.csv', sep=";", dec=",", 
+                   header= TRUE, stringsAsFactors = FALSE)
 
 
 #### ---------------------------------------------------------------------------
@@ -69,12 +72,12 @@ scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo"
 server <- function(input, output){
   
   
-  #output$tab <- renderTable({
-  
-  #thisName <- paste(input$location, input$timeframe, input$scenario, sep = "_")
-  #message(thisName)
-  #list_dfs[[thisName]]
-  #})
+  output$table <- renderDT(change,
+                           filter = "top",
+                           options = list(
+                             pageLength = 5
+                           )
+  )
   
   output$plo <- renderPlot({
     
@@ -157,10 +160,6 @@ server <- function(input, output){
     plo
   })
   
-  
-    
-  
-  
 }
 
 
@@ -210,11 +209,12 @@ ui <- shinyUI(fluidPage(
     mainPanel(
       width = 8,
       
-      #h3("Taulukko"),
-      #tableOutput("tab"),
       hr(),
-      h4("Virtaamien muutos muuttuvassa ilmastossa"),
-      plotOutput("plo")
+      h4("Kuvaaja"),
+      plotOutput("plo"),
+      
+      h4("Taulukko"),
+      DTOutput("table")
     )
   )
 ))
