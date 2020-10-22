@@ -16,7 +16,7 @@ wd <- getwd()
 #csspath <- file.path(wd, "app_style.css")
 
 # App version
-app_v <- "0002 (21.10.2020)"
+app_v <- "0002 (22.10.2020)"
 
 # Install libraries
 #install.packages("shiny")
@@ -33,11 +33,10 @@ require(reshape2)
 
 setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 
-### DATA WRANGLING -------------------------------------------------------------
+### load data -------------------------------------------------------------
 
-# Output: list with as many dataframes with all possible combinations of data
-# plus reference dataframes for all areas (162 + 27)
 
+# Plots
 ref_list <- readRDS("data/ref_list.rds")
 scen_list <- readRDS("data/scen_list.rds")
 
@@ -49,20 +48,23 @@ scen_list <- readRDS("data/scen_list.rds")
 
 
 # Parameters
-locations <- c("Vuoksi", "Kymijoki", "Saarijärven reitti", "Rautalammin reitti","Vantaanjoki",
-                "Aurajoki","Kokemäenjoki","Längelmäveden-Hauhon reitti",
-                "Loimijoki","Lapväärtinjoki", "Laihianjoki",
-                "Kyrönjoki", "Lapuanjoki","Perhonjoki",
-                "Kalajoki", "Pyhäjoki", "Siikajoki","Ala-Oulujoki", "Ontojärvi-Lentua","Iijoki", "Simojoki",
-                "Ala-Kemijoki","Ylä-Ounasjoki", "Kitinen", "Tornionjoki-Muonionjoki","Teno", "Paatsjoki")
+locations <- c("Vuoksi", "Kymijoki", "Saarijärven reitti", "Rautalammin reitti",
+               "Vantaanjoki","Aurajoki","Kokemäenjoki","Längelmäveden-Hauhon reitti",
+               "Loimijoki","Lapväärtinjoki", "Laihianjoki",
+               "Kyrönjoki", "Lapuanjoki","Perhonjoki",
+               "Kalajoki", "Pyhäjoki", "Siikajoki","Ala-Oulujoki",
+               "Ontojärvi-Lentua","Iijoki", "Simojoki",
+               "Ala-Kemijoki","Ylä-Ounasjoki", "Kitinen", 
+               "Tornionjoki-Muonionjoki","Teno", "Paatsjoki")
 
 timeframe_names <- c("2010-2039", "2040-2069") # 1, 2
 scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo") # 1, 2, 3
 
 
+#lineType <- c(1, 2, 3)
 
-#varit <- c("ref_ka" = "gray21", "ref_maxmin" = "grey75", "lammin_ka" = "tan1", "lammin_maxmin" ="tan1", 
-#"kylma_ka" = "turquoise3", "kylma_maxmin" = "turquoise3", "ka45_ka" = "indianred2", "ka45_maxmin" = "indianred2")
+
+
 #load("ref_list.RData")
 
 #### ShinyApp Server -----------------------------------------------------------
@@ -85,18 +87,27 @@ server <- function(input, output){
     nameRef <- paste(input$location, "ref", sep ="_")
     thisRefPlot <- ref_list[[nameRef]]
     
+    cols <- c("ref1" = "grey21",
+              "ref2" = "grey75",
+              "scen1" = "tan1", 
+              "scen2" = "turquoise3", 
+              "scen3" = "indianred2")
+
+    ##
     plo <- ggplot(data = thisRefPlot, 
-                  aes(x = D_M, y = mean)) +
-      geom_line(aes(y = mean, colour = "gray21"), size = 1.2) +
-      labs(title= input$location, 
-           y = expression(paste("Virtaama (", m^3,"/s)", sep="")))+
-      geom_ribbon(aes(ymin=min, ymax=max, colour = NA),
-                  fill="grey75", alpha = 0.5) +
+                  aes(x = D_M, y = mean, group = "group")) +
       
-      geom_line(data=thisPlot, aes(y = mean, colour = "blue"),
-                size = 1.2) +
-      geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = "blue"),
-                  fill = NA, size = 1.1, linetype = 3) +
+      labs(title= paste(input$location, ": päivittäinen virtaama"), 
+           y = expression(paste("Virtaama (", m^3,"/s)", sep=""))) +
+      
+      geom_line(aes(y = mean, colour = "ref1"), size = 1.2) +
+      geom_ribbon(aes(ymin=min, ymax=max, fill = "ref2"), 
+                  colour = NA, alpha = 0.5) +
+      
+      # geom_line(data=thisPlot, aes(y = mean, colour = "green"),
+      #           size = 1.2) +
+      # geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = "red"),linetype = 2,
+      #             fill = NA, size = 1.1) +
 
       
       # MUUT ASETUKSET
@@ -105,6 +116,10 @@ server <- function(input, output){
       
       # x-akseli, kuukausittain
       scale_x_date(expand = c(0,0),date_labels = "%b", date_breaks = "1 month")+
+      
+      scale_colour_manual(name = " ", values=cols) +
+      scale_fill_manual(name = " ", values = cols) +
+      
       # Tyyliseikat
       theme(axis.title.x=element_blank(),
             axis.text.x = element_text(size=10, face = "bold"),
@@ -168,6 +183,8 @@ ui <- shinyUI(fluidPage(
     ),
     
     
+    
+    
     ### mainPanel contents -----------------------------------------------------
     mainPanel(
       width = 9,
@@ -175,7 +192,7 @@ ui <- shinyUI(fluidPage(
       #h3("Taulukko"),
       #tableOutput("tab"),
       hr(),
-      h3("Kuvaaja"),
+      h4("Virtaamien muutos muuttuvassa ilmastossa"),
       plotOutput("plo")
     )
   )
