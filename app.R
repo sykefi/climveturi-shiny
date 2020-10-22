@@ -60,6 +60,7 @@ timeframe_names <- c("2010-2039", "2040-2069") # 1, 2
 scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo") # 1, 2, 3
 
 
+
 #lineType <- c(1, 2, 3)
 
 
@@ -92,11 +93,19 @@ server <- function(input, output){
               "2" = "turquoise3", 
               "3" = "indianred2")
     
+    scens <- c("1" = "Lämmin ja märkä",
+               "2" = "Kylmä",
+               "3" = "Usean skenaarion keskiarvo")
+    
+    times <- c("1" = "2010-2039",
+               "2" = "2040-2069")
+    
     ##
     plo <- ggplot(data = thisRefPlot, 
                   aes(x = D_M, y = mean,  group = "group")) +
       
-      labs(title= paste(input$location, ": päivittäinen virtaama"), 
+      labs(title= paste(input$location, "\nSkenaario: ", scens[input$scenario],
+                        "\nAjanjakso: ", times[input$timeframe]), 
            y = expression(paste("Virtaama (", m^3,"/s)", sep=""))) +
       
       geom_line(aes(y = mean, colour = "ref1"), size = 1.2) +
@@ -116,8 +125,13 @@ server <- function(input, output){
       # x-akseli, kuukausittain
       scale_x_date(expand = c(0,0),date_labels = "%b", date_breaks = "1 month")+
       
-      scale_colour_manual(name = " ", values = cols) +
-      scale_fill_manual(name = " ", values = cols) +
+      scale_colour_manual(name = " ", values = cols,
+                          breaks = c("ref1", as.character(input$scenario)),
+                          labels = c("1981-2010 simuloitu keskiarvo",
+                                     "Simuloitu keskiarvo ja vaihteluväli")) +
+      scale_fill_manual(name = " ", values = cols,
+                        breaks = c("ref2"),
+                        labels = c("1981-2010 simuloitu vaihteluväli (max-min)")) +
       
       # Tyyliseikat
       theme(axis.title.x=element_blank(),
