@@ -62,10 +62,6 @@ scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo"
 
 
 
-#lineType <- c(1, 2, 3)
-
-
-
 #load("ref_list.RData")
 
 #### ShinyApp Server -----------------------------------------------------------
@@ -102,6 +98,8 @@ server <- function(input, output){
                "2" = "2040-2069")
     
     ##
+    #options(repr.plot.width = 14, repr.plot.height = 8)
+    
     plo <- ggplot(data = thisRefPlot, 
                   aes(x = D_M, y = mean,  group = "group")) +
       
@@ -133,24 +131,32 @@ server <- function(input, output){
       scale_fill_manual(name = " ", values = cols,
                         breaks = c("ref2"),
                         labels = c("1981-2010 simuloitu vaihteluväli (max-min)")) +
+    
+      guides(colour = guide_legend(override.aes = list(linetype=c(1,1),
+                                                       shape = c(16, 16)))) +
+      
       
       # Tyyliseikat
       theme(axis.title.x=element_blank(),
-            axis.text.x = element_text(size=10, face = "bold"),
-            axis.text.y = element_text(size=10),
+            axis.text.x = element_text(size=11, face = "bold"),
+            axis.text.y = element_text(size=11),
             panel.background = element_blank(),
-            panel.grid.major = element_blank(),
+            panel.grid.major.y = element_line(colour="grey70"),
             axis.line = element_line(colour="grey"),
             #legend.spacing.y = unit(-0.4, "cm"),
-            #legend.position = c(1, 1.05),
-            #legend.justification = c("right", "top"),
+            legend.position = "bottom",
+            legend.justification ="left",
             #legend.box.just = "left",
             #legend.margin = margin(6, 6, 6, 6),
             #legend.background = element_blank(),
-            #legend.text = element_text(size=10),
+            legend.text = element_text(size=11),
+            
+            
             #legend.key.size = unit(0.5, "cm"),
-            #legend.box.background = element_rect(alpha("white", 0.3), color =NA),
-            plot.title = element_text(size=12, face="bold")) 
+            legend.box.background = element_rect(alpha("white", 0.3), color =NA),
+            plot.title = element_text(size=14)) 
+    
+    width = 9
     
     plo
   })
