@@ -117,7 +117,7 @@ server <- function(input, output){
       geom_line(data=thisPlot, aes(y = mean, colour = as.character(input$scenario), group = 1),
                 size = 1.2, alpha = 0.8) +
       geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = as.character(input$scenario), group = 1),linetype = 3,
-                  fill = NA, size = 1.05, alpha = 0.8) +
+                  fill = NA, size = 1.1, alpha = 0.8) +
       
       
       # MUUT ASETUKSET
