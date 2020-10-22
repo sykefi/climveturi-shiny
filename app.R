@@ -1,5 +1,5 @@
 # Climveturi App
-# 19.10.2020, 21.10
+# 19.10.2020, 21.10, 22.10
 
 
 
@@ -141,10 +141,10 @@ server <- function(input, output){
             axis.text.x = element_text(size=11, face = "bold"),
             axis.text.y = element_text(size=11),
             panel.background = element_blank(),
-            panel.grid.major.y = element_line(colour="grey70"),
+            #panel.grid.major.y = element_line(colour="grey70"),
             axis.line = element_line(colour="grey"),
-            legend.position = "bottom",
-            legend.justification ="left",
+            legend.position ="bottom",
+            legend.justification = c("left", "top"),
             #legend.box.just = "left",
             legend.margin = margin(6, 6, 6, 6),
             legend.background = element_blank(),
@@ -156,6 +156,11 @@ server <- function(input, output){
     
     plo
   })
+  
+  
+    
+  
+  
 }
 
 
@@ -203,7 +208,7 @@ ui <- shinyUI(fluidPage(
     
     ### mainPanel contents -----------------------------------------------------
     mainPanel(
-      width = 9,
+      width = 8,
       
       #h3("Taulukko"),
       #tableOutput("tab"),
