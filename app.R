@@ -84,7 +84,7 @@ server <- function(input, output){
     nameRef <- paste(input$location, "ref", sep ="_")
     thisRefPlot <- ref_list[[nameRef]]
     
-    cols <- c("ref1" = "grey21",
+    cols <- c("ref1" = "grey40",
               "ref2" = "grey75",
               "1" = "tan1", 
               "2" = "turquoise3", 
@@ -107,14 +107,14 @@ server <- function(input, output){
                         "\nAjanjakso: ", times[input$timeframe]), 
            y = expression(paste("Virtaama (", m^3,"/s)", sep=""))) +
       
-      geom_line(aes(y = mean, colour = "ref1"), size = 1.2) +
       geom_ribbon(aes(ymin=min, ymax=max, fill = "ref2"), 
                   colour = NA, alpha = 0.5) +
+      geom_line(aes(y = mean, colour = "ref1"), size = 1.2, alpha = 0.8) +
       
       geom_line(data=thisPlot, aes(y = mean, colour = as.character(input$scenario), group = 1),
-                size = 1.2) +
+                size = 1.2, alpha = 0.8) +
       geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = as.character(input$scenario), group = 1),linetype = 3,
-                  fill = NA, size = 1.1) +
+                  fill = NA, size = 1.05, alpha = 0.8) +
       
       
       # MUUT ASETUKSET
@@ -143,20 +143,16 @@ server <- function(input, output){
             panel.background = element_blank(),
             panel.grid.major.y = element_line(colour="grey70"),
             axis.line = element_line(colour="grey"),
-            #legend.spacing.y = unit(-0.4, "cm"),
             legend.position = "bottom",
             legend.justification ="left",
             #legend.box.just = "left",
-            #legend.margin = margin(6, 6, 6, 6),
-            #legend.background = element_blank(),
+            legend.margin = margin(6, 6, 6, 6),
+            legend.background = element_blank(),
             legend.text = element_text(size=11),
-            
-            
-            #legend.key.size = unit(0.5, "cm"),
             legend.box.background = element_rect(alpha("white", 0.3), color =NA),
             plot.title = element_text(size=14)) 
     
-    width = 9
+    #width = 9
     
     plo
   })
