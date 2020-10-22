@@ -1,4 +1,3 @@
-
 # Climveturi App
 # 19.10.2020, 21.10
 
@@ -89,13 +88,13 @@ server <- function(input, output){
     
     cols <- c("ref1" = "grey21",
               "ref2" = "grey75",
-              "scen1" = "tan1", 
-              "scen2" = "turquoise3", 
-              "scen3" = "indianred2")
-
+              "1" = "tan1", 
+              "2" = "turquoise3", 
+              "3" = "indianred2")
+    
     ##
     plo <- ggplot(data = thisRefPlot, 
-                  aes(x = D_M, y = mean, group = "group")) +
+                  aes(x = D_M, y = mean,  group = "group")) +
       
       labs(title= paste(input$location, ": päivittäinen virtaama"), 
            y = expression(paste("Virtaama (", m^3,"/s)", sep=""))) +
@@ -104,11 +103,11 @@ server <- function(input, output){
       geom_ribbon(aes(ymin=min, ymax=max, fill = "ref2"), 
                   colour = NA, alpha = 0.5) +
       
-      # geom_line(data=thisPlot, aes(y = mean, colour = "green"),
-      #           size = 1.2) +
-      # geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = "red"),linetype = 2,
-      #             fill = NA, size = 1.1) +
-
+      geom_line(data=thisPlot, aes(y = mean, colour = as.character(input$scenario), group = 1),
+                size = 1.2) +
+      geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = as.character(input$scenario), group = 1),linetype = 3,
+                  fill = NA, size = 1.1) +
+      
       
       # MUUT ASETUKSET
       # Y ja X akselit
@@ -117,7 +116,7 @@ server <- function(input, output){
       # x-akseli, kuukausittain
       scale_x_date(expand = c(0,0),date_labels = "%b", date_breaks = "1 month")+
       
-      scale_colour_manual(name = " ", values=cols) +
+      scale_colour_manual(name = " ", values = cols) +
       scale_fill_manual(name = " ", values = cols) +
       
       # Tyyliseikat
