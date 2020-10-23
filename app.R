@@ -41,9 +41,7 @@ setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 # Plots
 ref_list <- readRDS("data/ref_list.rds")
 scen_list <- readRDS("data/scen_list.rds")
-chg_list <- readRDS("data/chg_list.rds")
-
-
+chg_dfs <- readRDS("data/chg_dfs.rds")
 
 
 #### ---------------------------------------------------------------------------
@@ -91,11 +89,11 @@ server <- function(input, output){
                               x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
     )
     
-    formattable(chg_list[[thisName]],
-                align = c("c"),
+    formattable(chg_dfs[[thisName]],
                 list(disp = formatter("span", 
                     style = x ~ style(
                       font.weight = "bold")),
+                    `Virtaama` = formatter("span"),
                     `Muutosprosentti` = muutos_form
                 ))
                                       
@@ -235,7 +233,7 @@ ui <- shinyUI(fluidPage(
       width = 8,
       
       hr(),
-      h5("Kuvaaja"),
+      h5(" "),
       plotOutput("plo"),
       
       h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010)"),
