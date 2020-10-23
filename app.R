@@ -15,7 +15,7 @@ wd <- getwd()
 #csspath <- file.path(wd, "app_style.css")
 
 # App version
-app_v <- "0002 (22.10.2020)"
+app_v <- "0002 (23.10.2020)"
 
 # Install libraries
 #install.packages("shiny")
@@ -39,8 +39,7 @@ setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 # Plots
 ref_list <- readRDS("data/ref_list.rds")
 scen_list <- readRDS("data/scen_list.rds")
-change <- read.csv('data/vesisto_muutos_long.csv', sep=";", dec=",", 
-                   header= TRUE, stringsAsFactors = FALSE)
+chg_list <- readRDS("data/chg_list.rds")
 
 
 #### ---------------------------------------------------------------------------
@@ -72,12 +71,17 @@ scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo"
 server <- function(input, output){
   
   
-  output$table <- renderDT(change,
-                           filter = "top",
-                           options = list(
-                             pageLength = 5
-                           )
-  )
+  
+  
+  output$table <- renderDT({
+    
+    thisName <- paste(input$location, input$timeframe, 
+                      input$scenario, "%", sep = "_")
+    message(thisName)
+    chg_list[[thisName]]
+    
+    
+  })
   
   output$plo <- renderPlot({
     
@@ -130,7 +134,7 @@ server <- function(input, output){
       scale_colour_manual(name = " ", values = cols,
                           breaks = c("ref1", as.character(input$scenario)),
                           labels = c("1981-2010 simuloitu keskiarvo",
-                                     "Simuloitu keskiarvo ja vaihteluväli")) +
+                                     paste(times[input$timeframe], "Simuloitu keskiarvo ja vaihteluväli", sep = " "))) +
       scale_fill_manual(name = " ", values = cols,
                         breaks = c("ref2"),
                         labels = c("1981-2010 simuloitu vaihteluväli (max-min)")) +
