@@ -28,6 +28,8 @@ require(dplyr)
 require(lubridate)
 require(reshape2)
 require(DT)
+library(data.table)
+library(formattable)
 
 
 
@@ -40,6 +42,8 @@ setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 ref_list <- readRDS("data/ref_list.rds")
 scen_list <- readRDS("data/scen_list.rds")
 chg_list <- readRDS("data/chg_list.rds")
+
+
 
 
 #### ---------------------------------------------------------------------------
@@ -70,20 +74,60 @@ scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo"
 
 server <- function(input, output){
   
-  
-  
-  
-  output$table <- renderDT({
+  output$table <- renderFormattable({
     
-    thisName <- paste(input$location, input$timeframe, 
+    thisName <- paste(input$location, input$timeframe,
                       input$scenario, "%", sep = "_")
     
+    muutos_form <- formatter("span", 
+                              style = x ~ style(
+                                font.weight = "bold",
+                                color = ifelse(x >= 20, "#b2182b",
+                                               ifelse(x < 20 & x >= 10, "#ef8a62",
+                                                      ifelse(x < 10 & x >=0, "#ffce99",
+                                                             ifelse(x < 0 & x >= -10, "#b3d9ff",
+                                                                    ifelse(x < -10 & x >= -20, "#67a9cf",
+                                                                           ifelse(x <-20, "#2166ac", "black"))))))),
+                              x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
+    )
     
-    message(thisName)
-    chg_list[[thisName]]
-    
+    formattable(chg_list[[thisName]],
+                align = c("c"),
+                list(disp = formatter("span", 
+                    style = x ~ style(
+                      font.weight = "bold")),
+                    `Muutosprosentti` = muutos_form
+                ))
+                                      
     
   })
+  
+  
+  
+  
+  # output$table <- renderFormattable({
+  #
+  #   thisName <- paste(input$location, input$timeframe,
+  #                     input$scenario, "%", sep = "_")
+  #
+  #   formattable(chg_list[[thisName]], list(
+  #     disp = formatter("span",
+  #                      style = x ~ style(font.weight = "bold")),
+  #     `Muutosprosentti` = formatter("span",
+  #                                   style = x ~ style(font.weight = "bold")),
+  #                                        color = ifelse(x > 0, "yellow",
+  #                                                       ifelse(x < 0, "violet",
+  #                                                              "black"))),
+  #                      x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x))
+  #
+  #   ))
+
+
+    # message(thisName)
+    
+    
+    
+  
   
   output$plo <- renderPlot({
     
@@ -216,11 +260,11 @@ ui <- shinyUI(fluidPage(
       width = 8,
       
       hr(),
-      h4("Kuvaaja"),
+      h5("Kuvaaja"),
       plotOutput("plo"),
       
-      h4("Taulukko"),
-      DTOutput("table")
+      h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010)"),
+      formattableOutput("table")
     )
   )
 ))
