@@ -104,31 +104,6 @@ server <- function(input, output){
   
   
   
-  
-  # output$table <- renderFormattable({
-  #
-  #   thisName <- paste(input$location, input$timeframe,
-  #                     input$scenario, "%", sep = "_")
-  #
-  #   formattable(chg_list[[thisName]], list(
-  #     disp = formatter("span",
-  #                      style = x ~ style(font.weight = "bold")),
-  #     `Muutosprosentti` = formatter("span",
-  #                                   style = x ~ style(font.weight = "bold")),
-  #                                        color = ifelse(x > 0, "yellow",
-  #                                                       ifelse(x < 0, "violet",
-  #                                                              "black"))),
-  #                      x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x))
-  #
-  #   ))
-
-
-    # message(thisName)
-    
-    
-    
-  
-  
   output$plo <- renderPlot({
     
     thisName <- paste(input$location, input$timeframe, input$scenario, sep = "_")
