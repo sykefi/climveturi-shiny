@@ -77,6 +77,8 @@ server <- function(input, output){
     
     thisName <- paste(input$location, input$timeframe, 
                       input$scenario, "%", sep = "_")
+    
+    
     message(thisName)
     chg_list[[thisName]]
     
