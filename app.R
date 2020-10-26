@@ -1,5 +1,5 @@
 # Climveturi App
-# 19.10.2020, 21.10, 22.10
+# 19.10.2020, 21.10, 22.10, 26.10
 
 
 
@@ -15,7 +15,7 @@ wd <- getwd()
 #csspath <- file.path(wd, "app_style.css")
 
 # App version
-app_v <- "0002 (23.10.2020)"
+app_v <- "0003 (26.10.2020)"
 
 # Install libraries
 #install.packages("shiny")
@@ -204,16 +204,20 @@ server <- function(input, output){
 
 
 #### ShinyApp User Interface ---------------------------------------------------
-ui <- shinyUI(fluidPage(theme = shinytheme("paper"),
-                        
+ui <- shinyUI(fluidPage(
+  theme = shinytheme("paper"),
+  
+  
+  headerPanel(
+    title=tags$a(href='https://www.syke.fi/fi-FI',tags$img(src='SYKE_tunnus_rgb_vaaka.png', 
+                                                           height = 50*0.75, width =182*0.75), target="_blank"),
+    windowTitle = "ClimVeTuri ilmastonmuutos"
+  ),
 
-                        
-                        
   # Import CSS style from external file
   #tags$head(htmltools::includeCSS(csspath)),
   
-  titlePanel(h1("TESTI"), 
-             windowTitle = "ClimVeturi visualisoinnit"),
+  titlePanel(h4("ClimVeturi visualisoinnit")),
   
   
   ### sidebarLayout contents ---------------------------------------------------
@@ -222,8 +226,7 @@ ui <- shinyUI(fluidPage(theme = shinytheme("paper"),
       width = 3,
       id = "sidebar",
       
-      p("Jotain tekstiä..."),
-      br(),
+      helpText("Visualisoi ilmastonmuutoksen vaikutuksia vesistöjen virtaamiin eri ajanjaksoilla ja skenaarioilla."),
       
       selectInput(
         inputId = "location", 
@@ -256,19 +259,61 @@ ui <- shinyUI(fluidPage(theme = shinytheme("paper"),
       #width = 8,
       
       tabsetPanel(
-        tabPanel("Muutokset virtaamissa"),
-        tabPanel("Tab 2")
+        tabPanel("Muutokset virtaamissa", 
+                 fluidRow(
+                   column(8,
+                          h5("Kuvaaja")),
+                   column(8,downloadButton("kuvaaja_lataus",
+                                            label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>"))),
+                   column(8, plotOutput("plo")),
+                   br(),
+                   column(12, h6("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010) valitulla ajanjaksolla ja skenaariolla")),
+                   column(12,  formattableOutput("table", width = 300))
+                 )),
+        
+     
+        
+        
+        # plotOutput("plo")),
+        #          h5("Kuvaaja"),
+        #          downloadButton("kuvaaja_lataus",
+        #                         label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>")),
+        #          
+        #          plotOutput("plo"),
+        #          
+        #          h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010)"),
+        #          formattableOutput("table"),
+        #          ),
+        
+        tabPanel("Tulvat?",
+                 fluidRow(
+                   h6("Tänne visualisointeja liittyen 100-vuoden tulvien muutoksiin."),
+                   p("Esim. kartta ja taulukko filttereiden mukaisesti/karttaa klikkaamalla...?")
+                 )),
+        
+        
+        
+        tabPanel("Käyttöohjeet",
+                 fluidPage(
+                   h6("Tänne liitetään sivuston käyttöohjeet yms."),
+                   p("- Taustaa hankkeesta"),
+                   p("- Aineistolähteet ja menetelmät"),
+                   p("--- Millä perusteella vesistöt valittu, skenaariot lyhyesti, ym."),
+                   p("- Ohjeet sivuston käyttöön"),
+                   p("- Kuvaajien ym .lataus"),
+                   p("- Yhteystiedot ja apua ongelmatilanteissa")
+                   ))
       ),
       
-      hr(),
-      h5("Kuvaaja"),
-      downloadButton("kuvaaja_lataus",
-                   label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>")),
-      plotOutput("plo"),
+      # hr(),
+      # h5("Kuvaaja"),
+      # downloadButton("kuvaaja_lataus",
+      #              label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>")),
+      # plotOutput("plo"),
       
       
-      h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010)"),
-      formattableOutput("table"),
+      # h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010)"),
+      # formattableOutput("table"),
       
       
     )
