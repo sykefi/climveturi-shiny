@@ -28,8 +28,9 @@ require(dplyr)
 require(lubridate)
 require(reshape2)
 require(DT)
-library(data.table)
-library(formattable)
+require(data.table)
+require(formattable)
+require(shinythemes)
 
 
 
@@ -116,9 +117,9 @@ server <- function(input, output){
               "2" = "turquoise3", 
               "3" = "indianred2")
     
-    scens <- c("1" = "Lämmin ja märkä",
-               "2" = "Kylmä",
-               "3" = "Usean skenaarion keskiarvo")
+    scens <- c("1" = "Lämmin ja märkä (MIROC-ESM-CHEM globaali ilmastomalli RCP4.5 päästöskenaariolla)",
+               "2" = "Kylmä (CESM1-CAM5 globaali ilmastomalli RCP2.6 päästöskenaariolla)",
+               "3" = "Usean skenaarion keskiarvo (RCP4.5 päästöskenaariolla)")
     
     times <- c("1" = "2010-2039",
                "2" = "2040-2069")
@@ -129,8 +130,9 @@ server <- function(input, output){
     plo <- ggplot(data = thisRefPlot, 
                   aes(x = D_M, y = mean,  group = "group")) +
       
-      labs(title= paste(input$location, "\nSkenaario: ", scens[input$scenario],
-                        "\nAjanjakso: ", times[input$timeframe]), 
+      labs(title= paste(input$location,
+                        "\nAjanjakso: ", times[input$timeframe],
+                        "\nSkenaario: ", scens[input$scenario]),
            y = expression(paste("Virtaama (", m^3,"/s)", sep=""))) +
       
       geom_ribbon(aes(ymin=min, ymax=max, fill = "ref2"), 
@@ -179,16 +181,34 @@ server <- function(input, output){
             plot.title = element_text(size=14)) 
     
     #width = 9
+
+    plo_out <<- plo
     
     plo
+    
   })
+  
+  output$kuvaaja_lataus <- downloadHandler(
+    filename = function() {
+      paste("kuvaaja_",input$location, "_", input$timeframe, "_", 
+            input$scenario, ".png",
+            sep = "")
+    },
+    
+    content = function(file) {
+      ggsave(plot = plo_out, file, height = 10, width = 16, dpi = 150)
+    }
+  )
   
 }
 
 
 #### ShinyApp User Interface ---------------------------------------------------
-ui <- shinyUI(fluidPage(
-  
+ui <- shinyUI(fluidPage(theme = shinytheme("paper"),
+                        
+
+                        
+                        
   # Import CSS style from external file
   #tags$head(htmltools::includeCSS(csspath)),
   
@@ -201,6 +221,9 @@ ui <- shinyUI(fluidPage(
     sidebarPanel(
       width = 3,
       id = "sidebar",
+      
+      p("Jotain tekstiä..."),
+      br(),
       
       selectInput(
         inputId = "location", 
@@ -230,14 +253,24 @@ ui <- shinyUI(fluidPage(
     
     ### mainPanel contents -----------------------------------------------------
     mainPanel(
-      width = 8,
+      #width = 8,
+      
+      tabsetPanel(
+        tabPanel("Muutokset virtaamissa"),
+        tabPanel("Tab 2")
+      ),
       
       hr(),
-      h5(" "),
+      h5("Kuvaaja"),
+      downloadButton("kuvaaja_lataus",
+                   label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>")),
       plotOutput("plo"),
       
+      
       h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010)"),
-      formattableOutput("table")
+      formattableOutput("table"),
+      
+      
     )
   )
 ))
