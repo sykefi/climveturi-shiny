@@ -17,9 +17,6 @@ wd <- getwd()
 # App version
 app_v <- "0003 (26.10.2020)"
 
-# Install libraries
-#install.packages("shiny")
-#install.package("ggplot2")
 
 # Import libraries
 require(shiny)
@@ -31,6 +28,7 @@ require(DT)
 require(data.table)
 require(formattable)
 require(shinythemes)
+require(shinyjs)
 
 
 
@@ -39,7 +37,7 @@ setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 ### load data -------------------------------------------------------------
 
 
-# Plots
+# Plots and tables
 ref_list <- readRDS("data/ref_list.rds")
 scen_list <- readRDS("data/scen_list.rds")
 chg_dfs <- readRDS("data/chg_dfs.rds")
@@ -73,6 +71,20 @@ scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo"
 
 server <- function(input, output){
   
+  # Hide sidebar in flood-page 
+  observeEvent(input[["tabset"]], {
+    if(input[["tabset"]] == "Muutokset tulvissa?"){
+      hideElement(selector = "#sidebar")
+      # removeCssClass("main", "col-sm-8")
+      # addCssClass("main", "col-sm-12")
+    }else{
+      showElement(selector = "#sidebar")
+      # removeCssClass("main", "col-sm-12")
+      # addCssClass("main", "col-sm-8")
+    }
+  })
+  
+  # Table with % changes
   output$table <- renderFormattable({
     
     thisName <- paste(input$location, input$timeframe,
@@ -102,7 +114,7 @@ server <- function(input, output){
   })
   
   
-  
+  # Plot
   output$plo <- renderPlot({
     
     thisName <- paste(input$location, input$timeframe, input$scenario, sep = "_")
@@ -124,8 +136,7 @@ server <- function(input, output){
     times <- c("1" = "2010-2039",
                "2" = "2040-2069")
     
-    ##
-    #options(repr.plot.width = 14, repr.plot.height = 8)
+  
     
     plo <- ggplot(data = thisRefPlot, 
                   aes(x = D_M, y = mean,  group = "group")) +
@@ -166,8 +177,8 @@ server <- function(input, output){
       
       # Tyyliseikat
       theme(axis.title.x=element_blank(),
-            axis.text.x = element_text(size=11, face = "bold"),
-            axis.text.y = element_text(size=11),
+            axis.text.x = element_text(size=12, face = "bold"),
+            axis.text.y = element_text(size=12),
             panel.background = element_blank(),
             #panel.grid.major.y = element_line(colour="grey70"),
             axis.line = element_line(colour="grey"),
@@ -188,6 +199,7 @@ server <- function(input, output){
     
   })
   
+  # Download button for plot
   output$kuvaaja_lataus <- downloadHandler(
     filename = function() {
       paste("kuvaaja_",input$location, "_", input$timeframe, "_", 
@@ -205,12 +217,13 @@ server <- function(input, output){
 
 #### ShinyApp User Interface ---------------------------------------------------
 ui <- shinyUI(fluidPage(
+  useShinyjs(),
   theme = shinytheme("paper"),
   
   
   headerPanel(
     title=tags$a(href='https://www.syke.fi/fi-FI',tags$img(src='SYKE_tunnus_rgb_vaaka.png', 
-                                                           height = 50*0.75, width =182*0.75), target="_blank"),
+                                                           height = 50*0.75, width = 182*0.75), target="_blank"),
     windowTitle = "ClimVeTuri ilmastonmuutos"
   ),
 
@@ -230,7 +243,7 @@ ui <- shinyUI(fluidPage(
       
       selectInput(
         inputId = "location", 
-        label = HTML("Valitse vesistöalue"),
+        label = HTML("Valitse vesistö"),
         choices = locations),
       
       radioButtons(
@@ -247,7 +260,7 @@ ui <- shinyUI(fluidPage(
         choiceValues = seq(1:length(scenario_names))
       ),
       
-      HTML(paste("<p id='version-info' style='color: grey; font-size: small;'>App versio<br>", 
+      HTML(paste("<p id='version-info' style='color: grey; font-size: small;'>Versio<br>", 
                  app_v, "</p>")),
     ),
     
@@ -268,7 +281,7 @@ ui <- shinyUI(fluidPage(
                    column(8, plotOutput("plo")),
                    br(),
                    column(12, h6("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010) valitulla ajanjaksolla ja skenaariolla")),
-                   column(12,  formattableOutput("table", width = 300))
+                   column(12,  formattableOutput("table",width = 400))
                  )),
         
      
@@ -287,8 +300,10 @@ ui <- shinyUI(fluidPage(
                    column(8,
                           includeMarkdown('./user-guide/userguide.rmd')
                    )
-                 ))
+                 )),
+        id = "tabset"
       ),
+      id = "main"
       
       
       
