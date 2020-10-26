@@ -274,18 +274,7 @@ ui <- shinyUI(fluidPage(
      
         
         
-        # plotOutput("plo")),
-        #          h5("Kuvaaja"),
-        #          downloadButton("kuvaaja_lataus",
-        #                         label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>")),
-        #          
-        #          plotOutput("plo"),
-        #          
-        #          h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010)"),
-        #          formattableOutput("table"),
-        #          ),
-        
-        tabPanel("Tulvat?",
+        tabPanel("Muutokset tulvissa?",
                  fluidRow(
                    h6("Tänne visualisointeja liittyen 100-vuoden tulvien muutoksiin."),
                    p("Esim. kartta ja taulukko filttereiden mukaisesti/karttaa klikkaamalla...?")
@@ -294,26 +283,13 @@ ui <- shinyUI(fluidPage(
         
         
         tabPanel("Käyttöohjeet",
-                 fluidPage(
-                   h6("Tänne liitetään sivuston käyttöohjeet yms."),
-                   p("- Taustaa hankkeesta"),
-                   p("- Aineistolähteet ja menetelmät"),
-                   p("--- Millä perusteella vesistöt valittu, skenaariot lyhyesti, ym."),
-                   p("- Ohjeet sivuston käyttöön"),
-                   p("- Kuvaajien ym .lataus"),
-                   p("- Yhteystiedot ja apua ongelmatilanteissa")
-                   ))
+                 fluidRow(
+                   column(8,
+                          includeMarkdown('./user-guide/userguide.rmd')
+                   )
+                 ))
       ),
       
-      # hr(),
-      # h5("Kuvaaja"),
-      # downloadButton("kuvaaja_lataus",
-      #              label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>")),
-      # plotOutput("plo"),
-      
-      
-      # h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010)"),
-      # formattableOutput("table"),
       
       
     )

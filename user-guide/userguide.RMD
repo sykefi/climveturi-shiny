@@ -1,0 +1,41 @@
+---
+title: "ClimVeTuri hankkeen visualisoinnit, SYKE"
+author: "Sara Todorovic"
+date: "26 10 2020"
+
+---
+
+#### ClimVeTuri hanke
+
+Hankkeen kuvausta ym. 
+
+<br>
+#### Aineisto
+
+<br>
+#### Sovelluksen käyttö
+##### Valinnat
+Mitä eri valintoja voi tehdä sivupaneelista ym.
+
+##### Muutokset virtaamissa
+Tekstiä...
+
+###### Kuvaaja
+Ominaisuudet, lataus ym.
+
+###### Taulukko
+
+##### Muutokset tulvissa
+###### Kartta?
+Mitä näkyy, miten käytetään ym.
+
+###### Taulukot?
+<br>
+#### Yhteystiedot ja palaute
+Jos ongelmia sivuston kanssa tai kysymyksiä, niin voi olla yhteydessä NN
+<br>
+
+#### Linkit
+Hankkeen sivu
+Muuta...
+
