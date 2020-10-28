@@ -49,6 +49,16 @@ chg_dfs <- readRDS("data/chg_dfs.rds")
 flood <- read.table("data/floods_coord_proj.txt", sep = "\t", header=TRUE, stringsAsFactors = FALSE)
 flood <- flood[,c(1:12,15,16)]
 
+# create separate dataframes and append to list, use in Flood-tab to create table and map
+# could be done smoother...
+flood_1_nimi <- flood[,c(3,5:7)]
+flood_2_nimi <- flood[,c(3,8:10)]
+flood_1 <- flood[,c(5:7)]
+flood_2 <- flood[,c(8:10)]
+flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi, 
+                   flood_1 = flood_1, flood_2 = flood_2)
+
+# read geopackage
 valuma <- readOGR("data/valuma.gpkg")
 valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
 
@@ -75,25 +85,11 @@ timeframe_names <- c("2010-2039", "2040-2069") # 1, 2
 scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo") # 1, 2, 3
 
 
-
-#load("ref_list.RData")
-
 #### ShinyApp Server -----------------------------------------------------------
 
 server <- function(input, output){
   
-  # Hide sidebar in flood-page 
-  observeEvent(input[["tabset"]], {
-    if(input[["tabset"]] == "Muutokset tulvissa?"){
-      hideElement(selector = "#sidebar")
-      # removeCssClass("main", "col-sm-8")
-      # addCssClass("main", "col-sm-12")
-    }else{
-      showElement(selector = "#sidebar")
-      # removeCssClass("main", "col-sm-12")
-      # addCssClass("main", "col-sm-8")
-    }
-  })
+### First tab with discharges  ------------
   
   # Table with % changes
   output$table <- renderFormattable({
@@ -223,10 +219,36 @@ server <- function(input, output){
     }
   )
   
+### Second tab with floods  ---------------------
   
   
+  output$table2 <- renderFormattable({
+    
+    tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
+   
+    # muutos_form <- formatter("span", 
+    #                          style = x ~ style(
+    #                            font.weight = "bold",
+    #                            color = ifelse(x >= 20, "#b2182b",
+    #                                           ifelse(x < 20 & x >= 10, "#ef8a62",
+    #                                                  ifelse(x < 10 & x >=0, "#ffce99",
+    #                                                         ifelse(x < 0 & x >= -10, "#b3d9ff",
+    #                                                                ifelse(x < -10 & x >= -20, "#67a9cf",
+    #                                                                       ifelse(x <-20, "#2166ac", "black"))))))),
+    #                          x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
+    # )
+    
+    formattable(flood_list[[tableData]],
+                list(disp = formatter("span", 
+                                      style = x ~ style(
+                                        font.weight = "bold"))
+                ))
+    
+    
+  })
   # testikartta
   output$map <- renderLeaflet({
+    
     
     colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
     
@@ -322,7 +344,7 @@ ui <- shinyUI(fluidPage(
                  
                  helpText("Visualisoi ilmastonmuutoksen vaikutuksia kerran sadassa vuodessa esiintyviin tulviin eri ajanjaksoilla."),
                  radioButtons(
-                   inputId = "timeframe",
+                   inputId = "timeframe2",
                    label = "Valitse ajanjakso",
                    choiceNames = timeframe_names,
                    choiceValues = seq(1:length(timeframe_names))
@@ -331,12 +353,15 @@ ui <- shinyUI(fluidPage(
                
                mainPanel(
                  fluidRow(
-                   column(6,
-                          leafletOutput("map", height=750)),
+                   
                    column(6,
                           br(),
-                          h5("Tähän taulukko."),
-                          p("Klikkaamalla riviä kohdentuu kartalla? Selvitellään.."))
+                          h5("Tähän taulukko"),
+                          p("Klikkaamalla riviä kohdentuu kartalla? Selvitellään.."),
+                          formattableOutput("table2",width = 400)),
+                   
+                   column(6,
+                          leafletOutput("map", height=750))
                  )),
                
              )
