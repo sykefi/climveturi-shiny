@@ -46,6 +46,8 @@ scen_list <- readRDS("data/scen_list.rds")
 chg_dfs <- readRDS("data/chg_dfs.rds")
 
 # Flood
+flood <- read.table("data/floods_coord_proj.txt", sep = "\t", header=TRUE, stringsAsFactors = FALSE)
+flood <- flood[,c(1:12,15,16)]
 
 
 #### ---------------------------------------------------------------------------
@@ -96,25 +98,25 @@ server <- function(input, output){
                       input$scenario, "%", sep = "_")
     
     muutos_form <- formatter("span", 
-                              style = x ~ style(
-                                font.weight = "bold",
-                                color = ifelse(x >= 20, "#b2182b",
-                                               ifelse(x < 20 & x >= 10, "#ef8a62",
-                                                      ifelse(x < 10 & x >=0, "#ffce99",
-                                                             ifelse(x < 0 & x >= -10, "#b3d9ff",
-                                                                    ifelse(x < -10 & x >= -20, "#67a9cf",
-                                                                           ifelse(x <-20, "#2166ac", "black"))))))),
-                              x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
+                             style = x ~ style(
+                               font.weight = "bold",
+                               color = ifelse(x >= 20, "#b2182b",
+                                              ifelse(x < 20 & x >= 10, "#ef8a62",
+                                                     ifelse(x < 10 & x >=0, "#ffce99",
+                                                            ifelse(x < 0 & x >= -10, "#b3d9ff",
+                                                                   ifelse(x < -10 & x >= -20, "#67a9cf",
+                                                                          ifelse(x <-20, "#2166ac", "black"))))))),
+                             x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
     )
     
     formattable(chg_dfs[[thisName]],
                 list(disp = formatter("span", 
-                    style = x ~ style(
-                      font.weight = "bold")),
-                    `Virtaama` = formatter("span"),
-                    `Muutosprosentti` = muutos_form
+                                      style = x ~ style(
+                                        font.weight = "bold")),
+                     `Virtaama` = formatter("span"),
+                     `Muutosprosentti` = muutos_form
                 ))
-                                      
+    
     
   })
   
@@ -141,7 +143,7 @@ server <- function(input, output){
     times <- c("1" = "2010-2039",
                "2" = "2040-2069")
     
-  
+    
     
     plo <- ggplot(data = thisRefPlot, 
                   aes(x = D_M, y = mean,  group = "group")) +
@@ -175,7 +177,7 @@ server <- function(input, output){
       scale_fill_manual(name = " ", values = cols,
                         breaks = c("ref2"),
                         labels = c("1981-2010 simuloitu vaihteluväli (max-min)")) +
-    
+      
       guides(colour = guide_legend(override.aes = list(linetype=c(1,1),
                                                        shape = c(16, 16)))) +
       
@@ -197,7 +199,7 @@ server <- function(input, output){
             plot.title = element_text(size=14)) 
     
     #width = 9
-
+    
     plo_out <<- plo
     
     plo
@@ -217,6 +219,25 @@ server <- function(input, output){
     }
   )
   
+  
+  
+  # testikartta
+  output$map <- renderLeaflet({
+    
+    colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
+    
+    leaflet() %>%
+      addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
+      
+      addMinicharts(flood$long, flood$lat, 
+                    type = "bar",
+                    chartdata = flood[, c("Mean_1039","Max_1039", "Min_1039")],
+                    colorPalette = colors,
+                    width = 50, 
+                    height = 60)
+    
+  })
+  
 }
 
 
@@ -231,90 +252,102 @@ ui <- shinyUI(fluidPage(
                                                            height = 50*0.75, width = 182*0.75), target="_blank"),
     windowTitle = "ClimVeTuri ilmastonmuutos"
   ),
-
+  
   # Import CSS style from external file
   #tags$head(htmltools::includeCSS(csspath)),
   
   titlePanel(h4("ClimVeturi visualisoinnit")),
   
-  
-  ### sidebarLayout contents ---------------------------------------------------
-  sidebarLayout(
-    sidebarPanel(
-      width = 3,
-      id = "sidebar",
-      
-      helpText("Visualisoi ilmastonmuutoksen vaikutuksia vesistöjen virtaamiin eri ajanjaksoilla ja skenaarioilla."),
-      
-      selectInput(
-        inputId = "location", 
-        label = HTML("Valitse vesistö"),
-        choices = locations),
-      
-      radioButtons(
-        inputId = "timeframe",
-        label = "Valitse ajanjakso",
-        choiceNames = timeframe_names,
-        choiceValues = seq(1:length(timeframe_names))
-      ),
-      
-      radioButtons(
-        inputId = "scenario",
-        label = "Valitse skenaario",
-        choiceNames = scenario_names,
-        choiceValues = seq(1:length(scenario_names))
-      ),
-      
-      HTML(paste("<p id='version-info' style='color: grey; font-size: small;'>Versio<br>", 
-                 app_v, "</p>")),
-    ),
-    
-    
-    
-    
-    ### mainPanel contents -----------------------------------------------------
-    mainPanel(
-      #width = 8,
-      
-      tabsetPanel(
-        tabPanel("Muutokset virtaamissa", 
+  tabsetPanel(
+    tabPanel("Muutokset virtaamissa", fluid = TRUE,
+             sidebarLayout(
+               sidebarPanel(
+                 width = 2,
+                 id = "sidebar",
+                 
+                 helpText("Visualisoi ilmastonmuutoksen vaikutuksia vesistöjen virtaamiin eri ajanjaksoilla ja skenaarioilla."),
+                 
+                 selectInput(
+                   inputId = "location", 
+                   label = HTML("Valitse vesistö"),
+                   choices = locations),
+                 
+                 radioButtons(
+                   inputId = "timeframe",
+                   label = "Valitse ajanjakso",
+                   choiceNames = timeframe_names,
+                   choiceValues = seq(1:length(timeframe_names))
+                 ),
+                 
+                 radioButtons(
+                   inputId = "scenario",
+                   label = "Valitse skenaario",
+                   choiceNames = scenario_names,
+                   choiceValues = seq(1:length(scenario_names))
+                 ),
+                 
+                 HTML(paste("<p id='version-info' style='color: grey; font-size: small;'>Versio<br>", 
+                            app_v, "</p>")),
+               ),
+               
+               mainPanel(
+                 
                  fluidRow(
                    column(8,
                           h5("Kuvaaja")),
                    column(8,downloadButton("kuvaaja_lataus",
-                                            label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>"))),
+                                           label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>"))),
                    column(8, plotOutput("plo")),
                    br(),
                    column(12, h6("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010) valitulla ajanjaksolla ja skenaariolla")),
                    column(12,  formattableOutput("table",width = 400))
                  )),
-        
-     
-        
-        
-        tabPanel("Muutokset tulvissa?",
+             )
+    ),
+    
+    tabPanel("Muutokset tulvissa", fluid = TRUE,
+             sidebarLayout(
+               sidebarPanel(
+                 width = 2,
+                 
+                 helpText("Visualisoi ilmastonmuutoksen vaikutuksia tulviin  eri ajanjaksoilla ja skenaarioilla."),
+                 radioButtons(
+                   inputId = "timeframe",
+                   label = "Valitse ajanjakso",
+                   choiceNames = timeframe_names,
+                   choiceValues = seq(1:length(timeframe_names))
+                 )
+               ),
+               
+               mainPanel(
                  fluidRow(
-                   h6("Tänne visualisointeja liittyen 100-vuoden tulvien muutoksiin."),
-                   p("Esim. kartta ja taulukko filttereiden mukaisesti/karttaa klikkaamalla...?")
+                   column(6,
+                          leafletOutput("map", height=750)),
+                   column(6,
+                          br(),
+                          p("Tähän taulukko..."))
                  )),
-        
-        
-        
-        tabPanel("Käyttöohjeet",
-                 fluidRow(
-                   column(8,
-                          includeMarkdown('./user-guide/userguide.rmd')
-                   )
-                 )),
-        id = "tabset"
-      ),
-      id = "main"
-      
-      
-      
+               
+             )
+    ),
+    
+    tabPanel("Käyttöohjeet",
+             mainPanel(
+               fluidRow(
+                 column(6,
+                        includeMarkdown('./user-guide/userguide.rmd'))))
     )
+    
+    
   )
 ))
+
+
+
+
+
+
+
 
 
 ### Run ShinyApp ---------------------------------------------------------------
