@@ -15,7 +15,7 @@ wd <- getwd()
 #csspath <- file.path(wd, "app_style.css")
 
 # App version
-app_v <- "0003 (26.10.2020)"
+app_v <- "0004 (28.10.2020)"
 
 
 # Import libraries
@@ -24,7 +24,6 @@ require(ggplot2)
 require(dplyr)
 require(lubridate)
 require(reshape2)
-require(DT)
 require(data.table)
 require(formattable)
 require(shinythemes)
@@ -32,6 +31,7 @@ require(shinyjs)
 library(htmltools)
 library(leaflet)
 library(leaflet.minicharts)
+library(rgdal)
 
 
 
@@ -48,6 +48,10 @@ chg_dfs <- readRDS("data/chg_dfs.rds")
 # Flood
 flood <- read.table("data/floods_coord_proj.txt", sep = "\t", header=TRUE, stringsAsFactors = FALSE)
 flood <- flood[,c(1:12,15,16)]
+
+valuma <- readOGR("data/valuma.gpkg")
+valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
+
 
 
 #### ---------------------------------------------------------------------------
@@ -227,8 +231,14 @@ server <- function(input, output){
     colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
     
     leaflet() %>%
-      addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-      
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(data = valuma,
+                  color = "#e14747",
+                  weight = 1,
+                  smoothFactor = 0.5,
+                  fill = FALSE) %>%
+    
+    
       addMinicharts(flood$long, flood$lat, 
                     type = "bar",
                     chartdata = flood[, c("Mean_1039","Max_1039", "Min_1039")],
@@ -310,7 +320,7 @@ ui <- shinyUI(fluidPage(
                sidebarPanel(
                  width = 2,
                  
-                 helpText("Visualisoi ilmastonmuutoksen vaikutuksia tulviin  eri ajanjaksoilla ja skenaarioilla."),
+                 helpText("Visualisoi ilmastonmuutoksen vaikutuksia kerran sadassa vuodessa esiintyviin tulviin eri ajanjaksoilla."),
                  radioButtons(
                    inputId = "timeframe",
                    label = "Valitse ajanjakso",
@@ -325,7 +335,8 @@ ui <- shinyUI(fluidPage(
                           leafletOutput("map", height=750)),
                    column(6,
                           br(),
-                          p("Tähän taulukko..."))
+                          h5("Tähän taulukko."),
+                          p("Klikkaamalla riviä kohdentuu kartalla? Selvitellään.."))
                  )),
                
              )
@@ -334,7 +345,7 @@ ui <- shinyUI(fluidPage(
     tabPanel("Käyttöohjeet",
              mainPanel(
                fluidRow(
-                 column(6,
+                 column(8,
                         includeMarkdown('./user-guide/userguide.rmd'))))
     )
     
