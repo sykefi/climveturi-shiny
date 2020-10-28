@@ -47,14 +47,13 @@ chg_dfs <- readRDS("data/chg_dfs.rds")
 
 # Flood
 flood <- read.table("data/floods_coord_proj.txt", sep = "\t", header=TRUE, stringsAsFactors = FALSE)
-flood <- flood[,c(1:12,15,16)]
 
 # create separate dataframes and append to list, use in Flood-tab to create table and map
 # could be done smoother...
 flood_1_nimi <- flood[,c(3,5:7)]
 flood_2_nimi <- flood[,c(3,8:10)]
-flood_1 <- flood[,c(5:7)]
-flood_2 <- flood[,c(8:10)]
+flood_1 <- flood[,c(3,5:7, 15,16)]
+flood_2 <- flood[,c(3,8:10,15,16)]
 flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi, 
                    flood_1 = flood_1, flood_2 = flood_2)
 
@@ -246,11 +245,9 @@ server <- function(input, output){
     
     
   })
-  # testikartta
+  # Basemap
+  
   output$map <- renderLeaflet({
-    
-    
-    colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
     
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
@@ -258,18 +255,32 @@ server <- function(input, output){
                   color = "#e14747",
                   weight = 1,
                   smoothFactor = 0.5,
-                  fill = FALSE) %>%
+                  fill = FALSE)
     
     
-      addMinicharts(flood$long, flood$lat, 
-                    type = "bar",
-                    chartdata = flood[, c("Mean_1039","Max_1039", "Min_1039")],
-                    colorPalette = colors,
-                    width = 50, 
-                    height = 60)
+      
     
   })
   
+  # Change barplots when timeframe changes
+  # Edit so that default is 2010-39, now default is nothing
+  # maybe checkbox?
+  
+  observeEvent(input$timeframe2, {
+    mapData <- flood_list[[paste("flood", input$timeframe2, sep="_")]]
+    
+    colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
+    
+    leafletProxy("map", data = mapData) %>%
+      addMinicharts(mapData$long, mapData$lat,
+                    type = "bar",
+                    chartdata = mapData[,c(2:4)],
+                    colorPalette = colors,
+                    width = 50,
+                    height = 60)
+  })
+
+
 }
 
 
