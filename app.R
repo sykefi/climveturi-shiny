@@ -29,6 +29,9 @@ require(data.table)
 require(formattable)
 require(shinythemes)
 require(shinyjs)
+library(htmltools)
+library(leaflet)
+library(leaflet.minicharts)
 
 
 
@@ -41,6 +44,8 @@ setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 ref_list <- readRDS("data/ref_list.rds")
 scen_list <- readRDS("data/scen_list.rds")
 chg_dfs <- readRDS("data/chg_dfs.rds")
+
+# Flood
 
 
 #### ---------------------------------------------------------------------------
