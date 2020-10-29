@@ -1,5 +1,5 @@
 # Climveturi App
-# 19.10.2020, 21.10, 22.10, 26.10
+# 19.10.2020, 21.10, 22.10, 26.10, 29.10
 
 
 
@@ -19,15 +19,15 @@ app_v <- "0004 (28.10.2020)"
 
 
 # Import libraries
-require(shiny)
-require(ggplot2)
-require(dplyr)
-require(lubridate)
-require(reshape2)
-require(data.table)
-require(formattable)
-require(shinythemes)
-require(shinyjs)
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(reshape2)
+library(data.table)
+library(formattable)
+library(shinythemes)
+library(shinyjs)
 library(htmltools)
 library(leaflet)
 library(leaflet.minicharts)
@@ -45,15 +45,21 @@ ref_list <- readRDS("data/ref_list.rds")
 scen_list <- readRDS("data/scen_list.rds")
 chg_dfs <- readRDS("data/chg_dfs.rds")
 
-# Flood
-flood <- read.table("data/floods_coord_proj.txt", sep = "\t", header=TRUE, stringsAsFactors = FALSE)
+# Flood data
+flood <- read.table("data/flood_coord_proj.txt", dec = ",", sep = "\t", header=TRUE, stringsAsFactors = FALSE)
+flood <- flood[,c(1,2,3,6,4,5,9,7,8,11,10)] 
+flood[,c(3:9)] <- round(flood[,c(3:9)], 2)
+names(flood) <- c("ID", "Vesistö", "Alue", "Keskiarvo 2010-2039","Maksimi 2010-2039","Minimi 2010-2039", 
+                  "Keskiarvo 2040-2069", "Maksimi 2040-2069","Minimi 2040-2069", "lat", "long")
 
-# create separate dataframes and append to list, use in Flood-tab to create table and map
-# could be done smoother...
-flood_1_nimi <- flood[,c(3,5:7)]
-flood_2_nimi <- flood[,c(3,8:10)]
-flood_1 <- flood[,c(3,5:7, 15,16)]
-flood_2 <- flood[,c(3,8:10,15,16)]
+# Create separate dataframes and append to list, use in Flood-tab to create table and map
+# Selection depends on the table created when reprojecting he coordinates. 
+# Here columns: 1 = ID, 2 = Vesisto (names), 3 = numbered codes for areas,
+# 4-6 = 2010-39 mean max min, 7-9 = 2040-69 mean max min, 10-11 = long lat
+flood_1_nimi <- flood[,c(2,4:6)]
+flood_2_nimi <- flood[,c(2,7:9)]
+flood_1 <- flood[,c(2,4:6, 10,11)]
+flood_2 <- flood[,c(2,7:9,10,11)]
 flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi, 
                    flood_1 = flood_1, flood_2 = flood_2)
 
@@ -65,18 +71,14 @@ valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
 
 #### ---------------------------------------------------------------------------
 
-# Load custom functions. Commented because this does not exist ahaha
-#source(file.path(wd, "app_funcs.R"))
-
-
 # Parameters
-locations <- c("Vuoksi", "Kymijoki", "Saarijärven reitti", "Rautalammin reitti",
-               "Vantaanjoki","Aurajoki","Kokemäenjoki","Längelmäveden-Hauhon reitti",
+locations <- c("Vuoksi", "Kymijoki", "Naarajärvi", "Konnevesi","Vantaanjoki",
+               "Aurajoki","Kokemäenjoki Pori","Valkeakoski Mallasvesi",
                "Loimijoki","Lapväärtinjoki", "Laihianjoki",
                "Kyrönjoki", "Lapuanjoki","Perhonjoki",
                "Kalajoki", "Pyhäjoki", "Siikajoki","Ala-Oulujoki",
-               "Ontojärvi-Lentua","Iijoki", "Simojoki",
-               "Ala-Kemijoki","Ylä-Ounasjoki", "Kitinen", 
+               "Niemelänjärvi", "Iijoki", "Simojoki",
+               "Kemijoki Isohaara","Ounasjoki Hossa", "Kitinen", 
                "Tornionjoki-Muonionjoki","Teno", "Paatsjoki") %>%
   sort()
 
@@ -95,7 +97,7 @@ server <- function(input, output){
     
     thisName <- paste(input$location, input$timeframe,
                       input$scenario, "%", sep = "_")
-    
+    # Set custom colours for % thresholds
     muutos_form <- formatter("span", 
                              style = x ~ style(
                                font.weight = "bold",
@@ -107,7 +109,7 @@ server <- function(input, output){
                                                                           ifelse(x <-20, "#2166ac", "black"))))))),
                              x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
     )
-    
+    # Create table
     formattable(chg_dfs[[thisName]],
                 list(disp = formatter("span", 
                                       style = x ~ style(
@@ -144,31 +146,29 @@ server <- function(input, output){
     
     
     
-    plo <- ggplot(data = thisRefPlot, 
-                  aes(x = D_M, y = mean,  group = "group")) +
-      
+    plo <- ggplot(
+      data = thisRefPlot,aes(x = D_M, y = mean,  group = "group")) +
       labs(title= paste(input$location,
                         "\nAjanjakso: ", times[input$timeframe],
                         "\nSkenaario: ", scens[input$scenario]),
            y = expression(paste("Virtaama (", m^3,"/s)", sep=""))) +
       
+      # Control period ribbom + geom line in all of the plots
       geom_ribbon(aes(ymin=min, ymax=max, fill = "ref2"), 
                   colour = NA, alpha = 0.5) +
       geom_line(aes(y = mean, colour = "ref1"), size = 1.2, alpha = 0.8) +
       
+      # Changes when input changes
       geom_line(data=thisPlot, aes(y = mean, colour = as.character(input$scenario), group = 1),
                 size = 1.2, alpha = 0.8) +
       geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = as.character(input$scenario), group = 1),linetype = 3,
                   fill = NA, size = 1.1, alpha = 0.8) +
       
       
-      # MUUT ASETUKSET
-      # Y ja X akselit
-      scale_y_continuous(breaks = scales::pretty_breaks(n = 6))+
-      
-      # x-akseli, kuukausittain
+      # x-axis
       scale_x_date(expand = c(0,0),date_labels = "%b", date_breaks = "1 month")+
       
+      # colour & legend settings
       scale_colour_manual(name = " ", values = cols,
                           breaks = c("ref1", as.character(input$scenario)),
                           labels = c("1981-2010 simuloitu keskiarvo",
@@ -181,7 +181,7 @@ server <- function(input, output){
                                                        shape = c(16, 16)))) +
       
       
-      # Tyyliseikat
+      # Style settings
       theme(axis.title.x=element_blank(),
             axis.text.x = element_text(size=12, face = "bold"),
             axis.text.y = element_text(size=12),
@@ -190,17 +190,16 @@ server <- function(input, output){
             axis.line = element_line(colour="grey"),
             legend.position ="bottom",
             legend.justification = c("left", "top"),
-            #legend.box.just = "left",
             legend.margin = margin(6, 6, 6, 6),
             legend.background = element_blank(),
             legend.text = element_text(size=11),
             legend.box.background = element_rect(alpha("white", 0.3), color =NA),
             plot.title = element_text(size=14)) 
     
-    #width = 9
-    
+    # copy to global environment for saving
     plo_out <<- plo
     
+    # display plot
     plo
     
   })
@@ -225,28 +224,30 @@ server <- function(input, output){
     
     tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
    
-    # muutos_form <- formatter("span", 
-    #                          style = x ~ style(
-    #                            font.weight = "bold",
-    #                            color = ifelse(x >= 20, "#b2182b",
-    #                                           ifelse(x < 20 & x >= 10, "#ef8a62",
-    #                                                  ifelse(x < 10 & x >=0, "#ffce99",
-    #                                                         ifelse(x < 0 & x >= -10, "#b3d9ff",
-    #                                                                ifelse(x < -10 & x >= -20, "#67a9cf",
-    #                                                                       ifelse(x <-20, "#2166ac", "black"))))))),
-    #                          x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
-    # )
+    muutos_form <- formatter("span",
+                             style = x ~ style(
+                               font.weight = "bold",
+                               color = ifelse(x >= 20, "#b2182b",
+                                              ifelse(x < 20 & x >= 10, "#ef8a62",
+                                                     ifelse(x < 10 & x >=0, "#ffce99",
+                                                            ifelse(x < 0 & x >= -10, "#b3d9ff",
+                                                                   ifelse(x < -10 & x >= -20, "#67a9cf",
+                                                                          ifelse(x <-20, "#2166ac", "black"))))))),
+                             x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
+    )
     
     formattable(flood_list[[tableData]],
                 list(disp = formatter("span", 
                                       style = x ~ style(
-                                        font.weight = "bold"))
-                ))
+                                        font.weight = "bold")),
+                     area(col = 2:4) ~ muutos_form)
+                     
+                    
+                )
     
     
   })
   # Basemap
-  
   output$map <- renderLeaflet({
     
     leaflet() %>%
@@ -272,7 +273,7 @@ server <- function(input, output){
     colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
     
     leafletProxy("map", data = mapData) %>%
-      addMinicharts(mapData$long, mapData$lat,
+      addMinicharts(mapData$lat, mapData$long,
                     type = "bar",
                     chartdata = mapData[,c(2:4)],
                     colorPalette = colors,
@@ -367,8 +368,8 @@ ui <- shinyUI(fluidPage(
                    
                    column(6,
                           br(),
-                          h5("Tähän taulukko"),
-                          p("Klikkaamalla riviä kohdentuu kartalla? Selvitellään.."),
+                          h5("Kuinka paljon kerran sadassa vuodessa tapahtuva tulva muuttuu ilmastonmuutoksen vaikutuksesta?"),
+                          p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden tulva muuttuu enintaan, vähintään ja keskimäärin valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010)."),
                           formattableOutput("table2",width = 400)),
                    
                    column(6,
