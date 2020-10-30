@@ -32,6 +32,7 @@ library(htmltools)
 library(leaflet)
 library(leaflet.minicharts)
 library(rgdal)
+library(DT)
 
 
 
@@ -220,7 +221,7 @@ server <- function(input, output){
 ### Second tab with floods  ---------------------
   
   
-  output$table2 <- renderFormattable({
+  output$table2 <- renderDT({
     
     tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
    
@@ -236,22 +237,30 @@ server <- function(input, output){
                              x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
     )
     
-    formattable(flood_list[[tableData]],
+    as.datatable(formattable(flood_list[[tableData]],
                 list(disp = formatter("span", 
                                       style = x ~ style(
                                         font.weight = "bold")),
                      area(col = 2:4) ~ muutos_form)
                      
                     
-                )
+                ), selection="multiple", escape=FALSE, 
+                options = list(sDom  = '<"top">lrt<"bottom">ip', pageLength= 27, lengthChange = FALSE), 
+                rownames = FALSE)
     
     
   })
   # Basemap
   output$map <- renderLeaflet({
     
+    # I want to make a map with radio buttons where user can select which column is visualized
+    # And the radius and colour is based on the value.
+    # Also filterin option (map_click)?
+    
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
+      addCircles(data = flood_1, lng = ~lat, lat = ~long,
+                 weight = 10, fill = TRUE) %>%
       addPolygons(data = valuma,
                   color = "#e14747",
                   weight = 1,
@@ -266,20 +275,22 @@ server <- function(input, output){
   # Change barplots when timeframe changes
   # Edit so that default is 2010-39, now default is nothing
   # maybe checkbox?
-  
-  observeEvent(input$timeframe2, {
-    mapData <- flood_list[[paste("flood", input$timeframe2, sep="_")]]
-    
-    colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
-    
-    leafletProxy("map", data = mapData) %>%
-      addMinicharts(mapData$lat, mapData$long,
-                    type = "bar",
-                    chartdata = mapData[,c(2:4)],
-                    colorPalette = colors,
-                    width = 50,
-                    height = 60)
-  })
+
+  # observeEvent(input$timeframe2, {
+  # 
+  #   mapData <- flood_list[[paste("flood", input$timeframe2, sep="_")]]
+  # 
+  #   colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
+  # 
+  #   leafletProxy("map", data = mapData) %>%
+  #     
+  #     addMinicharts(mapData$lat, mapData$long,
+  #                   type = "bar",
+  #                   chartdata = mapData[,c(2:4)],
+  #                   colorPalette = colors,
+  #                   width = 50,
+  #                   height = 60)
+  # })
 
 
 }
@@ -288,7 +299,7 @@ server <- function(input, output){
 #### ShinyApp User Interface ---------------------------------------------------
 ui <- shinyUI(fluidPage(
   useShinyjs(),
-  theme = shinytheme("paper"),
+  theme = shinytheme("flatly"),
   
   
   headerPanel(
@@ -300,7 +311,7 @@ ui <- shinyUI(fluidPage(
   # Import CSS style from external file
   #tags$head(htmltools::includeCSS(csspath)),
   
-  titlePanel(h4("ClimVeturi visualisoinnit")),
+  titlePanel(h4("Ilmastonmuutoksen vaikutus vesistöihin -visualisointityökalu")),
   
   tabsetPanel(
     tabPanel("Muutokset virtaamissa", fluid = TRUE,
@@ -310,6 +321,7 @@ ui <- shinyUI(fluidPage(
                  id = "sidebar",
                  
                  helpText("Visualisoi ilmastonmuutoksen vaikutuksia vesistöjen virtaamiin eri ajanjaksoilla ja skenaarioilla."),
+                 
                  
                  selectInput(
                    inputId = "location", 
@@ -343,7 +355,7 @@ ui <- shinyUI(fluidPage(
                                            label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>"))),
                    column(8, plotOutput("plo")),
                    br(),
-                   column(12, h6("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010) valitulla ajanjaksolla ja skenaariolla")),
+                   #column(12, h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010) valitulla ajanjaksolla ja skenaariolla (%)")),
                    column(12,  formattableOutput("table",width = 400))
                  )),
              )
@@ -355,6 +367,7 @@ ui <- shinyUI(fluidPage(
                  width = 2,
                  
                  helpText("Visualisoi ilmastonmuutoksen vaikutuksia kerran sadassa vuodessa esiintyviin tulviin eri ajanjaksoilla."),
+                
                  radioButtons(
                    inputId = "timeframe2",
                    label = "Valitse ajanjakso",
@@ -368,9 +381,10 @@ ui <- shinyUI(fluidPage(
                    
                    column(6,
                           br(),
-                          h5("Kuinka paljon kerran sadassa vuodessa tapahtuva tulva muuttuu ilmastonmuutoksen vaikutuksesta?"),
-                          p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden tulva muuttuu enintaan, vähintään ja keskimäärin valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010)."),
-                          formattableOutput("table2",width = 400)),
+                          strong("Kuinka paljon kerran sadassa vuodessa tapahtuva tulva muuttuu ilmastonmuutoksen vaikutuksesta?"),
+                          p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden tulva muuttuu enintaan, vähintään ja keskimäärin valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Luvut ovat prosentteja (%)"),
+                          
+                          DTOutput("table2",width = 400)),
                    
                    column(6,
                           leafletOutput("map", height=750))
@@ -379,7 +393,19 @@ ui <- shinyUI(fluidPage(
              )
     ),
     
-    tabPanel("Käyttöohjeet",
+    tabPanel("Ohje ja taustaa",
+             sidebarLayout(
+               sidebarPanel(
+                 width = 2,
+                 
+                 strong("Tällä sivulla:"),
+                 em("taustaa, sovelluksen käyttöohje, yhteystiedot ja palaute."),
+                 helpText("Tietoa hankkeesta: ", 
+                          tags$a(href= "https://www.syke.fi/fi-FI/Tutkimus__kehittaminen/Tutkimus_ja_kehittamishankkeet/Hankkeet/ClimVeTuri",
+                                 "ClimVeTuri", target="_blank")),
+                 
+               ),
+             
              mainPanel(
                fluidRow(
                  column(8,
@@ -387,7 +413,7 @@ ui <- shinyUI(fluidPage(
     )
     
     
-  )
+  ))
 ))
 
 
