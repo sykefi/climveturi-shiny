@@ -26,7 +26,7 @@ library(leaflet)
 library(leaflet.minicharts)
 library(rgdal)
 library(DT)
-Sys.getlocale()
+
 
 
 ### load data -------------------------------------------------------------
@@ -39,7 +39,7 @@ chg_dfs <- readRDS("data/chg_dfs.rds")
 # Flood data
 flood <- read.table("data/flood_coord_proj.txt", dec = ",", sep = "\t", header=TRUE, stringsAsFactors = FALSE, encoding = "UTF-8")
 flood <- flood[,c(1,2,3,6,4,5,9,7,8,11,10)] 
-flood[,c(3:9)] <- round(flood[,c(3:9)], 1)
+flood[,c(3:9)] <- round(flood[,c(3:9)], 0)
 names(flood) <- c("ID", "Vesistö", "Alue", "Keskiarvo 2010-2039","Maksimi 2010-2039","Minimi 2010-2039", 
                   "Keskiarvo 2040-2069", "Maksimi 2040-2069","Minimi 2040-2069", "lat", "long")
 
@@ -64,18 +64,16 @@ valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
 #### ---------------------------------------------------------------------------
 
 # Parameters
-locations <- c("Vuoksi", "Kymijoki", "Naarajärvi", "Konnevesi","Vantaanjoki",
-               "Aurajoki","Kokemäenjoki Pori","Valkeakoski Mallasvesi",
+locations <- c("Vuoksi", "Kymijoki", "Naarajärvi, Saarijärven reitti", "Konnevesi","Vantaanjoki",
+               "Aurajoki","Kokemäenjoki, Pori","Valkeakoski, Mallasvesi",
                "Loimijoki","Lapväärtinjoki", "Laihianjoki",
                "Kyrönjoki", "Lapuanjoki","Perhonjoki",
-               "Kalajoki", "Pyhäjoki", "Siikajoki","Ala-Oulujoki",
-               "Niemelänjärvi", "Iijoki", "Simojoki",
-               "Kemijoki Isohaara","Ounasjoki Hossa", "Kitinen", 
-               "Tornionjoki-Muonionjoki","Teno", "Paatsjoki") %>%
+               "Kalajoki", "Pyhäjoki", "Siikajoki","Oulujoki, Merikoski","Niemelänjärvi", "Iijoki", "Simojoki",
+               "Kemijoki, Isohaara","Ounasjoki, Hossa", "Kitinen", "Tornionjoki, Tornio","Teno", "Paatsjoki") %>%
   sort()
 
 timeframe_names <- c("2010-2039", "2040-2069") # 1, 2
-scenario_names <- c("Lämmin ja märkä", "Kylmä", "Usean skenaarion keskiarvo") # 1, 2, 3
+scenario_names <- c("Usean skenaarion keskiarvo","Lämmin ja märkä", "Kylmä") # 1, 2, 3
 
 
 #### ShinyApp Server -----------------------------------------------------------
@@ -125,13 +123,13 @@ server <- function(input, output){
     
     cols <- c("ref1" = "grey40",
               "ref2" = "grey75",
-              "1" = "tan1", 
-              "2" = "turquoise3", 
-              "3" = "indianred2")
+              "1" = "indianred2", 
+              "2" = "tan1", 
+              "3" = "turquoise3")
     
-    scens <- c("1" = "Lämmin ja märkä (MIROC-ESM-CHEM globaali ilmastomalli RCP4.5 päästöskenaariolla)",
-               "2" = "Kylmä (CESM1-CAM5 globaali ilmastomalli RCP2.6 päästöskenaariolla)",
-               "3" = "Usean skenaarion keskiarvo (RCP4.5 päästöskenaariolla)")
+    scens <- c("1" = "Usean skenaarion keskiarvo (RCP4.5 päästöskenaariolla)",
+               "2" = "Lämmin ja märkä (MIROC-ESM-CHEM globaali ilmastomalli RCP4.5 päästöskenaariolla)",
+               "3" = "Kylmä (CESM1-CAM5 globaali ilmastomalli RCP2.6 päästöskenaariolla)")
     
     times <- c("1" = "2010-2039",
                "2" = "2040-2069")
