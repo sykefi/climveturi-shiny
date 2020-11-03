@@ -1,6 +1,4 @@
 # Climveturi App
-# 19.10.2020, 21.10, 22.10, 26.10, 29.10
-
 
 
 # Clear workspace
@@ -8,14 +6,9 @@ rm(list = ls())
 
 ### INITIALISE -----------------------------------------------------------------
 
-#### Working paths ####
-wd <- getwd()
-
-# Component paths. Commented because this does not exist ahaha
-#csspath <- file.path(wd, "app_style.css")
 
 # App version
-app_v <- "0004 (28.10.2020)"
+app_v <- "0005 (03.11.2020)"
 
 
 # Import libraries
@@ -36,8 +29,6 @@ library(DT)
 
 
 
-setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
-
 ### load data -------------------------------------------------------------
 
 
@@ -55,6 +46,7 @@ names(flood) <- c("ID", "Vesistö", "Alue", "Keskiarvo 2010-2039","Maksimi 2010-
 
 # Create separate dataframes and append to list, use in Flood-tab to create table and map
 # Selection depends on the table created when reprojecting he coordinates. 
+
 # Here columns: 1 = ID, 2 = Vesisto (names), 3 = numbered codes for areas,
 # 4-6 = 2010-39 mean max min, 7-9 = 2040-69 mean max min, 10-11 = long lat
 flood_1_nimi <- flood[,c(2,4:6)]
@@ -255,7 +247,7 @@ server <- function(input, output){
     
     # I want to make a map with radio buttons where user can select which column is visualized
     # And the radius and colour is based on the value.
-    # Also filterin option (map_click)?
+    # Also filtering option (map_click)?
     
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
@@ -409,7 +401,8 @@ ui <- shinyUI(fluidPage(
              mainPanel(
                fluidRow(
                  column(8,
-                        includeMarkdown('./user-guide/userguide.rmd'))))
+                        includeMarkdown('userguide/user_guide.rmd'))
+                 ))
     )
     
     

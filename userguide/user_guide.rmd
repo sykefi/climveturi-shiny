@@ -58,9 +58,11 @@ Valittujen muuttujien avulla piirtyy kuvaaja, jossa näkyvät:
 
 
 #### Muutokset tulvissa
-Toisella välilehdellä käyttäjä voi valita sivupaneelista ajankohdan, ja tarkastella ilmastonmuutoksen vaikutusta kerran sadassa vuodessa tapahtuviin tulviin eri puolilla Suomea. Analyysissä on laskettu 25 eri ilmastonmuutosskenaarion kesimääräinen muutos.  
+Toisella välilehdellä käyttäjä voi valita sivupaneelista ajankohdan, ja tarkastella ilmastonmuutoksen vaikutusta kerran sadassa vuodessa tapahtuviin tulviin eri puolilla Suomea. Analyysissä on laskettu 25 eri ilmastonmuutosskenaarion keskimääräinen muutos.  
 
-##### **Taulukot?**..
+
+##### **Taulukot?**  
+
 
 ##### **Kartta?**
 Mitä näkyy, miten käytetään ym.
@@ -72,6 +74,7 @@ Mitä näkyy, miten käytetään ym.
 Jos ongelmia sivuston kanssa tai kysymyksiä, niin voi olla yhteydessä NN
 <br>
 
+***
 #### Linkit
 Hankkeen sivu
 Muuta...  
