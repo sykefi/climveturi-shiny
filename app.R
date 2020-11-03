@@ -26,11 +26,10 @@ library(leaflet)
 library(leaflet.minicharts)
 library(rgdal)
 library(DT)
-
+Sys.getlocale()
 
 
 ### load data -------------------------------------------------------------
-
 
 # Plots and tables
 ref_list <- readRDS("data/ref_list.rds")
@@ -38,9 +37,9 @@ scen_list <- readRDS("data/scen_list.rds")
 chg_dfs <- readRDS("data/chg_dfs.rds")
 
 # Flood data
-flood <- read.table("data/flood_coord_proj.txt", dec = ",", sep = "\t", header=TRUE, stringsAsFactors = FALSE)
+flood <- read.table("data/flood_coord_proj.txt", dec = ",", sep = "\t", header=TRUE, stringsAsFactors = FALSE, encoding = "UTF-8")
 flood <- flood[,c(1,2,3,6,4,5,9,7,8,11,10)] 
-flood[,c(3:9)] <- round(flood[,c(3:9)], 2)
+flood[,c(3:9)] <- round(flood[,c(3:9)], 1)
 names(flood) <- c("ID", "Vesistö", "Alue", "Keskiarvo 2010-2039","Maksimi 2010-2039","Minimi 2010-2039", 
                   "Keskiarvo 2040-2069", "Maksimi 2040-2069","Minimi 2040-2069", "lat", "long")
 
@@ -252,12 +251,12 @@ server <- function(input, output){
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
       addCircles(data = flood_1, lng = ~lat, lat = ~long,
-                 weight = 10, fill = TRUE) %>%
-      addPolygons(data = valuma,
-                  color = "#e14747",
-                  weight = 1,
-                  smoothFactor = 0.5,
-                  fill = FALSE)
+                 weight = 10, fill = TRUE)
+      # addPolygons(data = valuma,
+      #             color = "#e14747",
+      #             weight = 1,
+      #             smoothFactor = 0.5,
+      #             fill = FALSE)
     
     
       
@@ -290,6 +289,8 @@ server <- function(input, output){
 
 #### ShinyApp User Interface ---------------------------------------------------
 ui <- shinyUI(fluidPage(
+  
+  
   useShinyjs(),
   theme = shinytheme("flatly"),
   
