@@ -8,14 +8,13 @@ rm(list = ls())
 
 
 # App version
-app_v <- "0005 (03.11.2020)"
+app_v <- "0006 (04.11.2020)"
 
 
 # Import libraries
 library(shiny)
 library(ggplot2)
 library(dplyr)
-library(lubridate)
 library(reshape2)
 library(data.table)
 library(formattable)
@@ -23,12 +22,14 @@ library(shinythemes)
 library(shinyjs)
 library(htmltools)
 library(leaflet)
-library(leaflet.minicharts)
 library(rgdal)
 library(ggiraph)
 library(DT)
 
+#wd <- setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 
+# css path
+csspath <- "app_style.css"
 
 ### load data -------------------------------------------------------------
 
@@ -53,12 +54,18 @@ flood_1_nimi <- flood[,c(2,4:6)]
 flood_2_nimi <- flood[,c(2,7:9)]
 flood_1 <- flood[,c(2,4:6, 10,11)]
 flood_2 <- flood[,c(2,7:9,10,11)]
+
+# create a parsed dataframe to be used in map popup
+flood_parsed <- flood[,c(2, 10,11)]
+names(flood_parsed) <- c("Nimi", "lat", "long")
+
 flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi, 
                    flood_1 = flood_1, flood_2 = flood_2)
 
+
 # read geopackage
-valuma <- readOGR("data/valuma.gpkg")
-valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
+# valuma <- readOGR("data/valuma_line.gpkg")
+# valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
 
 
 
@@ -193,8 +200,8 @@ server <- function(input, output){
     
     
     # copy to global environment for saving
-    plo_out <<- 
-      plo_out +
+    plo_out <<-
+      plo +
       theme(legend.text = element_text(size = 16),
             axis.text = element_text(size = 18),
             axis.title = element_text(size = 18))
@@ -218,6 +225,38 @@ server <- function(input, output){
       ggsave(plot = plo_out, file, height = 10, width = 16, dpi = 150)
     }
   )
+  
+  # Map for page 1
+  output$map_1 <- renderLeaflet({
+    
+    
+    leaflet() %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       option=leafletOptions(minZoom = 5, maxZoom = 8)) %>%
+      addCircles(data = flood_parsed, lng = ~lat, lat = ~long,
+                 weight = 10, fill = TRUE, label = ~htmlEscape(Nimi)) 
+
+      # addPolylines(data = valuma,
+      #             color = "#e14747",
+      #             weight = 1,
+      #             smoothFactor = 0.5)
+    
+    # to do: add legend
+    
+    
+  })
+  
+  # Highlight the input location on map
+  
+  observe({
+    thisPoint <- subset(flood_parsed, flood_parsed$Nimi == input$location)
+
+    leafletProxy(mapId = "map_1") %>%
+      clearGroup("highlighted_point") %>%
+      addCircleMarkers(data = thisPoint, lng=~lat, lat=~long,
+                       color = "yellow", group = "highlighted_point",
+                       label = ~htmlEscape(Nimi))
+  })
   
 ### Second tab with floods  ---------------------
   
@@ -251,8 +290,10 @@ server <- function(input, output){
     
     
   })
-  # Basemap
-  output$map <- renderLeaflet({
+  
+  
+  # Map for page 2
+  output$map_2 <- renderLeaflet({
     
     # I want to make a map with radio buttons where user can select which column is visualized
     # And the radius and colour is based on the value.
@@ -267,11 +308,11 @@ server <- function(input, output){
       #             weight = 1,
       #             smoothFactor = 0.5,
       #             fill = FALSE)
-    
-    
-      
+
     
   })
+  
+  
   
   # Change barplots when timeframe changes
   # Edit so that default is 2010-39, now default is nothing
@@ -352,16 +393,22 @@ ui <- shinyUI(fluidPage(
                mainPanel(
                  
                  fluidRow(
-                   column(8,
-                          h5("Kuvaaja")),
-                   column(8,downloadButton("kuvaaja_lataus",
-                                           label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>"))),
-                   column(8, ggiraphOutput("plo", 
-                                           width = "100%",
-                                           height = "100%")),
-                   br(),
-                   #column(12, h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010) valitulla ajanjaksolla ja skenaariolla (%)")),
-                   column(12,  formattableOutput("table",width = 400))
+                   column(12,
+                          fluidRow(
+                            column(7,
+                                   h5("Kuvaaja"),
+                                   downloadButton("kuvaaja_lataus",
+                                                  label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>")),
+                                   ggiraphOutput("plo", 
+                                                 width = "100%",
+                                                 height = "100%"),
+                                   formattableOutput("table",width = 400)),
+                                   
+                          column(4,
+                                 "Mittauskohteiden sijainnit kartalla",
+                                 leafletOutput("map_1", height = 750))
+                          ))
+                   
                  )),
              )
     ),
@@ -392,7 +439,7 @@ ui <- shinyUI(fluidPage(
                           DTOutput("table2",width = 400)),
                    
                    column(6,
-                          leafletOutput("map", height=750))
+                          leafletOutput("map_2", height=750))
                  )),
                
              )
