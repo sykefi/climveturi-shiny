@@ -20,6 +20,8 @@ Tässä sovelluksessa on mahdollista visualisoida ilmastonmuutoksen vaikutuksia 
 ### Aineisto
 Hydrologinen aineisto perustuu SYKEn tekemiin mittauksiin eri virtaamapisteillä vuosina 1981-2010, sekä tästä referenssiaineistosta tehtyihin ilmastonmuutossimulaatioihin aina vuodelle 2069 saakka.
 
+Tietoa skenaarioista?
+
 ***
 
 ### Sovelluksen käyttö

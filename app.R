@@ -25,6 +25,7 @@ library(htmltools)
 library(leaflet)
 library(leaflet.minicharts)
 library(rgdal)
+library(ggiraph)
 library(DT)
 
 
@@ -113,7 +114,7 @@ server <- function(input, output){
   
   
   # Plot
-  output$plo <- renderPlot({
+  output$plo <- renderggiraph({
     
     thisName <- paste(input$location, input$timeframe, input$scenario, sep = "_")
     thisPlot <- scen_list[[thisName]]
@@ -134,7 +135,7 @@ server <- function(input, output){
     times <- c("1" = "2010-2039",
                "2" = "2040-2069")
     
-    
+   
     
     plo <- ggplot(
       data = thisRefPlot,aes(x = D_M, y = mean,  group = "group")) +
@@ -146,23 +147,25 @@ server <- function(input, output){
       # Control period ribbom + geom line in all of the plots
       geom_ribbon(aes(ymin=min, ymax=max, fill = "ref2"), 
                   colour = NA, alpha = 0.5) +
-      geom_line(aes(y = mean, colour = "ref1"), size = 1.2, alpha = 0.8) +
+      geom_line(aes(y = mean, colour = "ref1"), size = 1.4, alpha = 0.8) +
       
       # Changes when input changes
       geom_line(data=thisPlot, aes(y = mean, colour = as.character(input$scenario), group = 1),
-                size = 1.2, alpha = 0.8) +
+                size = 1.4, alpha = 0.8) +
       geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = as.character(input$scenario), group = 1),linetype = 3,
-                  fill = NA, size = 1.1, alpha = 0.8) +
+                  fill = NA, size = 1.2, alpha = 0.8) +
+      
       
       
       # x-axis
       scale_x_date(expand = c(0,0),date_labels = "%b", date_breaks = "1 month")+
       
+      
       # colour & legend settings
       scale_colour_manual(name = " ", values = cols,
                           breaks = c("ref1", as.character(input$scenario)),
                           labels = c("1981-2010 simuloitu keskiarvo",
-                                     paste(times[input$timeframe], "Simuloitu keskiarvo ja vaihteluväli", sep = " "))) +
+                                     paste(times[input$timeframe], "simuloitu keskiarvo ja vaihteluväli", sep = " "))) +
       scale_fill_manual(name = " ", values = cols,
                         breaks = c("ref2"),
                         labels = c("1981-2010 simuloitu vaihteluväli (max-min)")) +
@@ -173,8 +176,9 @@ server <- function(input, output){
       
       # Style settings
       theme(axis.title.x=element_blank(),
-            axis.text.x = element_text(size=12, face = "bold"),
-            axis.text.y = element_text(size=12),
+            axis.text.x = element_text(size=20, face = "bold"),
+            axis.text.y = element_text(size=20),
+            axis.title.y = element_text(size = 20),
             panel.background = element_blank(),
             #panel.grid.major.y = element_line(colour="grey70"),
             axis.line = element_line(colour="grey"),
@@ -182,15 +186,23 @@ server <- function(input, output){
             legend.justification = c("left", "top"),
             legend.margin = margin(6, 6, 6, 6),
             legend.background = element_blank(),
-            legend.text = element_text(size=11),
+            legend.text = element_text(size=19),
             legend.box.background = element_rect(alpha("white", 0.3), color =NA),
-            plot.title = element_text(size=14)) 
+            plot.title = element_text(size=25))
+    
+    
     
     # copy to global environment for saving
-    plo_out <<- plo
+    plo_out <<- 
+      plo_out +
+      theme(legend.text = element_text(size = 16),
+            axis.text = element_text(size = 18),
+            axis.title = element_text(size = 18))
     
     # display plot
-    plo
+    ggiraph(code = print(plo),
+            width_svg = 16.7,
+            height_svg = 9)
     
   })
   
@@ -344,7 +356,9 @@ ui <- shinyUI(fluidPage(
                           h5("Kuvaaja")),
                    column(8,downloadButton("kuvaaja_lataus",
                                            label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>"))),
-                   column(8, plotOutput("plo")),
+                   column(8, ggiraphOutput("plo", 
+                                           width = "100%",
+                                           height = "100%")),
                    br(),
                    #column(12, h5("Muutokset virtaamissa suhteessa referenssijaksoon (1981-2010) valitulla ajanjaksolla ja skenaariolla (%)")),
                    column(12,  formattableOutput("table",width = 400))
