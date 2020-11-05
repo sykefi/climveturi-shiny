@@ -73,7 +73,7 @@ locations <- c("Vuoksi", "Kymijoki", "Naarajärvi, Saarijärven reitti", "Konnev
                "Loimijoki","Lapväärtinjoki", "Laihianjoki",
                "Kyrönjoki", "Lapuanjoki","Perhonjoki",
                "Kalajoki", "Pyhäjoki", "Siikajoki","Oulujoki, Merikoski","Niemelänjärvi", "Iijoki", "Simojoki",
-               "Kemijoki, Isohaara","Ounasjoki, Hossa", "Kitinen", "Tornionjoki, Tornio","Teno", "Paatsjoki") %>%
+               "Kemijoki, Isohaara","Ounasjoki, Hossa", "Kitinen", "Tornionjoki, Tornio","Teno", "Paatsjoki, Kaitakoski") %>%
   sort()
 
 timeframe_names <- c("2010-2039", "2040-2069") # 1, 2
@@ -409,7 +409,7 @@ ui <- shinyUI(fluidPage(
                                    ggiraphOutput("plo", 
                                                  width = "100%",
                                                  height = "100%"),
-                                   br(),
+                                   
                                    h5("Taulukko"),
                                    formattableOutput("table",width = 400)),
                                    
