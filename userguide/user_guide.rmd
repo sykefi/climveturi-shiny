@@ -1,7 +1,7 @@
 ---
 title: "ClimVeTuri hankkeen visualisoinnit, SYKE"
 author: "Sara Todorovic"
-date: "30 10 2020"
+date: "5 11 2020"
 
 ---
 <br>
@@ -33,7 +33,7 @@ Ensimmäisellä välilehdellä käyttäjä voi valita sivupaneelista tarkasteluu
 
 1. **Valitse vesistöalue alasvetovalikosta**. Kohteita on yhteensä 27. Visualisointiin on valittu vesistöjä, jotka ovat mahdollisimman vähän säännösteltyjä.  
 
-2. **Valitse ajanjakso.** Valittavana on ilmastonmuokkaus vuosille 2010-2039 sekä 2040-2069. Huomioi, että osa ennustetusta kasvusta  on jo tapahtunut viimeisen kymmenen vuoden aikana, sillä referenssijaksona on käytetty vuosia 1981-2010.  
+2. **Valitse ajanjakso.** Valittavana on ilmastonmuutos vuosille 2010-2039 sekä 2040-2069. Huomioi, että osa ennustetusta kasvusta  on jo tapahtunut viimeisen kymmenen vuoden aikana, sillä referenssijaksona on käytetty vuosia 1981-2010.  
 
 3. **Valitse ilmastonmuutosskenaario.**
 
@@ -72,14 +72,26 @@ Mitä näkyy, miten käytetään ym.
 <br>
 
 ***
+
+#### Hyödyllisiä linkkejä  
+
+Lisätietoa ClimVeTuri-hankkeesta: <a href="https://www.syke.fi/fi-FI/Tutkimus__kehittaminen/Tutkimus_ja_kehittamishankkeet/Hankkeet/ClimVeTuri/Vesienhoidon_ja_tulvariskien_hallinnan_y(49676)" target="_blank">Hankkeen sivu</a>  
+
+Ilmastonmuutoksen ja vesienhoidon huomioon ottaminen tulvariskien hallinnassa -ohjeistus (3/2020): <a href="https://www.ymparisto.fi/download/noname/%7BBBDABB7C-C44B-45B6-BDAE-BECF7DD05087%7D/157142" target="_blank">Lataa pdf</a>  
+
+Tutkittua tietoa ilmastonmuutoksesta koottuna yhdelle sivustolle: <a href="https://ilmasto-opas.fi/fi/" target="_blank">ilmasto-opas.fi</a>  
+
+Ajankohtaista vesitietoa Suomesta: <a href="https://www.vesi.fi/" target="_blank">vesi.fi</a>  
+
+
+
+
+***
+<br>
 ### Yhteystiedot ja palaute
 Jos ongelmia sivuston kanssa tai kysymyksiä, niin voi olla yhteydessä NN
 <br>
 
 ***
-#### Linkit
-Hankkeen sivu
-Muuta...  
-<br>
 
 

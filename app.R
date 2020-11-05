@@ -8,7 +8,7 @@ rm(list = ls())
 
 
 # App version
-app_v <- "0006 (04.11.2020)"
+app_v <- "0007 (05.11.2020)"
 
 
 # Import libraries
@@ -42,7 +42,7 @@ chg_dfs <- readRDS("data/chg_dfs.rds")
 flood <- read.table("data/flood_coord_proj.txt", dec = ",", sep = "\t", header=TRUE, stringsAsFactors = FALSE, encoding = "UTF-8")
 flood <- flood[,c(1,2,3,6,4,5,9,7,8,11,10)] 
 flood[,c(3:9)] <- round(flood[,c(3:9)], 0)
-names(flood) <- c("ID", "Vesistö", "Alue", "Keskiarvo 2010-2039","Maksimi 2010-2039","Minimi 2010-2039", 
+names(flood) <- c("ID", "Nimi", "Alue", "Keskiarvo 2010-2039","Maksimi 2010-2039","Minimi 2010-2039", 
                   "Keskiarvo 2040-2069", "Maksimi 2040-2069","Minimi 2040-2069", "lat", "long")
 
 # Create separate dataframes and append to list, use in Flood-tab to create table and map
@@ -55,17 +55,13 @@ flood_2_nimi <- flood[,c(2,7:9)]
 flood_1 <- flood[,c(2,4:6, 10,11)]
 flood_2 <- flood[,c(2,7:9,10,11)]
 
-# create a parsed dataframe to be used in map popup
-flood_parsed <- flood[,c(2, 10,11)]
-names(flood_parsed) <- c("Nimi", "lat", "long")
-
 flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi, 
                    flood_1 = flood_1, flood_2 = flood_2)
 
 
 # read geopackage
-# valuma <- readOGR("data/valuma_line.gpkg")
-# valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
+valuma <- readOGR("data/valuma_line.gpkg")
+valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
 
 
 
@@ -93,6 +89,8 @@ server <- function(input, output){
   # Table with % changes
   output$table <- renderFormattable({
     
+    
+    
     thisName <- paste(input$location, input$timeframe,
                       input$scenario, "%", sep = "_")
     # Set custom colours for % thresholds
@@ -107,14 +105,15 @@ server <- function(input, output){
                                                                           ifelse(x <-20, "#2166ac", "black"))))))),
                              x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
     )
-    # Create table
-    formattable(chg_dfs[[thisName]],
+    # Create table (33a5 is unicode for m3)
+    formattable(chg_dfs[[thisName]], col.names=c("Virtaama (\u33a5/s)", "Muutos (%)"),
                 list(disp = formatter("span", 
                                       style = x ~ style(
                                         font.weight = "bold")),
                      `Virtaama` = formatter("span"),
-                     `Muutosprosentti` = muutos_form
-                ))
+                     `Muutosprosentti` = muutos_form)
+                     
+                )
     
     
   })
@@ -177,7 +176,7 @@ server <- function(input, output){
                         breaks = c("ref2"),
                         labels = c("1981-2010 simuloitu vaihteluväli (max-min)")) +
       
-      guides(colour = guide_legend(override.aes = list(linetype=c(1,1),
+      guides(colour = guide_legend(nrow= 2,override.aes = list(linetype=c(1,1),
                                                        shape = c(16, 16)))) +
       
       
@@ -191,9 +190,9 @@ server <- function(input, output){
             axis.line = element_line(colour="grey"),
             legend.position ="bottom",
             legend.justification = c("left", "top"),
-            legend.margin = margin(6, 6, 6, 6),
+            legend.margin = margin(),
             legend.background = element_blank(),
-            legend.text = element_text(size=19),
+            legend.text = element_text(size=20),
             legend.box.background = element_rect(alpha("white", 0.3), color =NA),
             plot.title = element_text(size=25))
     
@@ -226,15 +225,16 @@ server <- function(input, output){
     }
   )
   
-  # Map for page 1
+  # Map for page 1: locations
   output$map_1 <- renderLeaflet({
     
     
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron,
                        option=leafletOptions(minZoom = 5, maxZoom = 8)) %>%
-      addCircles(data = flood_parsed, lng = ~lat, lat = ~long,
-                 weight = 10, fill = TRUE, label = ~htmlEscape(Nimi)) 
+      addCircles(data = flood_1, lng = ~lat, lat = ~long,
+                 weight = 10, fill = TRUE, label = ~htmlEscape(Nimi),
+                 labelOptions = labelOptions(textsize = "12px")) 
 
       # addPolylines(data = valuma,
       #             color = "#e14747",
@@ -247,15 +247,15 @@ server <- function(input, output){
   })
   
   # Highlight the input location on map
-  
   observe({
-    thisPoint <- subset(flood_parsed, flood_parsed$Nimi == input$location)
+    thisPoint <- subset(flood_1, flood_1$Nimi == input$location)
 
     leafletProxy(mapId = "map_1") %>%
       clearGroup("highlighted_point") %>%
       addCircleMarkers(data = thisPoint, lng=~lat, lat=~long,
                        color = "yellow", group = "highlighted_point",
-                       label = ~htmlEscape(Nimi))
+                       label = ~htmlEscape(Nimi),
+                       labelOptions = labelOptions(textsize = "12px"))
   })
   
 ### Second tab with floods  ---------------------
@@ -284,8 +284,10 @@ server <- function(input, output){
                      area(col = 2:4) ~ muutos_form)
                      
                     
-                ), selection="multiple", escape=FALSE, 
-                options = list(sDom  = '<"top">lrt<"bottom">ip', pageLength= 27, lengthChange = FALSE), 
+                ), 
+                selection ="multiple", escape=FALSE, 
+                options = list(sDom  = '<"top">lrt<"bottom">ip', pageLength= 27, lengthChange = FALSE,
+                               columnDefs = list(list(targets = c(0), type = "num-fmt"))),
                 rownames = FALSE)
     
     
@@ -302,12 +304,12 @@ server <- function(input, output){
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
       addCircles(data = flood_1, lng = ~lat, lat = ~long,
-                 weight = 10, fill = TRUE)
-      # addPolygons(data = valuma,
-      #             color = "#e14747",
-      #             weight = 1,
-      #             smoothFactor = 0.5,
-      #             fill = FALSE)
+                 weight = 10, fill = TRUE) %>%
+      addPolygons(data = valuma,
+                  color = "#e14747",
+                  weight = 1,
+                  smoothFactor = 0.5,
+                  fill = FALSE)
 
     
   })
@@ -344,6 +346,11 @@ ui <- shinyUI(fluidPage(
   
   useShinyjs(),
   theme = shinytheme("flatly"),
+  
+  tags$head(tags$link(rel = "stylesheet", 
+                      type = "text/css", 
+                      href = "https://use.fontawesome.com/releases/v5.13.0/css/all.css"),
+            htmltools::includeCSS(csspath)),
   
   
   headerPanel(
@@ -402,10 +409,12 @@ ui <- shinyUI(fluidPage(
                                    ggiraphOutput("plo", 
                                                  width = "100%",
                                                  height = "100%"),
+                                   br(),
+                                   h5("Taulukko"),
                                    formattableOutput("table",width = 400)),
                                    
                           column(4,
-                                 "Mittauskohteiden sijainnit kartalla",
+                                 "Mallinnettujen virtaamapisteiden sijainti kartalla",
                                  leafletOutput("map_1", height = 750))
                           ))
                    
@@ -418,7 +427,7 @@ ui <- shinyUI(fluidPage(
                sidebarPanel(
                  width = 2,
                  
-                 helpText("Visualisoi ilmastonmuutoksen vaikutuksia kerran sadassa vuodessa esiintyviin tulviin eri ajanjaksoilla."),
+                 helpText("Visualisoi ilmastonmuutoksen vaikutuksia kerran sadassa vuodessa (1/100a) esiintyviin tulviin eri ajanjaksoilla."),
                 
                  radioButtons(
                    inputId = "timeframe2",
@@ -430,16 +439,18 @@ ui <- shinyUI(fluidPage(
                
                mainPanel(
                  fluidRow(
-                   
-                   column(6,
-                          br(),
-                          strong("Kuinka paljon kerran sadassa vuodessa tapahtuva tulva muuttuu ilmastonmuutoksen vaikutuksesta?"),
-                          p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden tulva muuttuu enintaan, vähintään ja keskimäärin valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Luvut ovat prosentteja (%)"),
+                   column(12,
+                          fluidRow(
+                          column(7,
+                                 br(),
+                                 strong("Kuinka paljon keskimäärin kerran sadassa vuodessa tapahtuva tulvan (1/100a) arvioidaan muuttuvan ilmastonmuutoksen vaikutuksesta?"),
+                                 p(" "),
+                                 p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden avovesitulva muuttuu enintään, vähintään ja keskimäärin valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Luvut ovat prosentteja (%)"),
+                                 
+                                 DTOutput("table2",width = 650)),
                           
-                          DTOutput("table2",width = 400)),
-                   
-                   column(6,
-                          leafletOutput("map_2", height=750))
+                          column(4,
+                                 leafletOutput("map_2", height=750))))
                  )),
                
              )
