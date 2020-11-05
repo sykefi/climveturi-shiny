@@ -25,6 +25,7 @@ library(leaflet)
 library(rgdal)
 library(ggiraph)
 library(DT)
+library(reactable)
 
 #wd <- setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 
@@ -42,17 +43,18 @@ chg_dfs <- readRDS("data/chg_dfs.rds")
 flood <- read.table("data/flood_coord_proj.txt", dec = ",", sep = "\t", header=TRUE, stringsAsFactors = FALSE, encoding = "UTF-8")
 flood <- flood[,c(1,2,3,6,4,5,9,7,8,11,10)] 
 flood[,c(3:9)] <- round(flood[,c(3:9)], 0)
-names(flood) <- c("ID", "Nimi", "Alue", "Keskiarvo 2010-2039","Maksimi 2010-2039","Minimi 2010-2039", 
-                  "Keskiarvo 2040-2069", "Maksimi 2040-2069","Minimi 2040-2069", "lat", "long")
+names(flood) <- c("ID", "Nimi", "Alue", "Keskiarvo","Maksimi","Minimi", 
+                  "Keskiarvo", "Maksimi","Minimi", "lat", "long")
 
 # Create separate dataframes and append to list, use in Flood-tab to create table and map
 # Selection depends on the table created when reprojecting he coordinates. 
 
-# Here columns: 1 = ID, 2 = Vesisto (names), 3 = numbered codes for areas,
-# 4-6 = 2010-39 mean max min, 7-9 = 2040-69 mean max min, 10-11 = long lat
+# 2010-39 with name
 flood_1_nimi <- flood[,c(2,4:6)]
 flood_2_nimi <- flood[,c(2,7:9)]
+# 2010-39
 flood_1 <- flood[,c(2,4:6, 10,11)]
+# 2040-69
 flood_2 <- flood[,c(2,7:9,10,11)]
 
 flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi, 
@@ -261,37 +263,125 @@ server <- function(input, output){
 ### Second tab with floods  ---------------------
   
   
-  output$table2 <- renderDT({
-    
+  # output$table2 <- renderDT({
+  #   
+  #   tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
+  #  
+  #   muutos_form <- formatter("span",
+  #                            style = x ~ style(
+  #                              font.weight = "bold",
+  #                              color = ifelse(x >= 20, "#b2182b",
+  #                                             ifelse(x < 20 & x >= 10, "#ef8a62",
+  #                                                    ifelse(x < 10 & x >=0, "#ffce99",
+  #                                                           ifelse(x < 0 & x >= -10, "#b3d9ff",
+  #                                                                  ifelse(x < -10 & x >= -20, "#67a9cf",
+  #                                                                         ifelse(x <-20, "#2166ac", "black"))))))),
+  #                            x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
+  #   )
+  #   
+  #   as.datatable(formattable(flood_list[[tableData]],
+  #               list(disp = formatter("span", 
+  #                                     style = x ~ style(
+  #                                       font.weight = "bold")),
+  #                    area(col = 2:4) ~ muutos_form)
+  #                    
+  #                   
+  #               ), 
+  #               selection ="multiple", escape=FALSE, 
+  #               options = list(sDom  = '<"top">lrt<"bottom">ip', pageLength= 27, lengthChange = FALSE,
+  #                              columnDefs = list(list(targets = c(0), type = "num-fmt"))),
+  #               rownames = FALSE)
+  #   
+  #   
+  # })
+  
+  # Flood table made with reactable https://glin.github.io/reactable/ v. 0.2.3
+  output$table2 <- renderReactable({
     tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
-   
-    muutos_form <- formatter("span",
-                             style = x ~ style(
-                               font.weight = "bold",
-                               color = ifelse(x >= 20, "#b2182b",
-                                              ifelse(x < 20 & x >= 10, "#ef8a62",
-                                                     ifelse(x < 10 & x >=0, "#ffce99",
-                                                            ifelse(x < 0 & x >= -10, "#b3d9ff",
-                                                                   ifelse(x < -10 & x >= -20, "#67a9cf",
-                                                                          ifelse(x <-20, "#2166ac", "black"))))))),
-                             x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
-    )
     
-    as.datatable(formattable(flood_list[[tableData]],
-                list(disp = formatter("span", 
-                                      style = x ~ style(
-                                        font.weight = "bold")),
-                     area(col = 2:4) ~ muutos_form)
-                     
-                    
-                ), 
-                selection ="multiple", escape=FALSE, 
-                options = list(sDom  = '<"top">lrt<"bottom">ip', pageLength= 27, lengthChange = FALSE,
-                               columnDefs = list(list(targets = c(0), type = "num-fmt"))),
-                rownames = FALSE)
+    reactable(flood_list[[tableData]],
+              height = 600,
+              pagination = FALSE,
+              highlight = TRUE,
+              
+              columns = list(
+                Nimi = colDef(
+                  name = "Vesistö",
+                  width = 230
+                ),
+                
+                Keskiarvo = colDef(
+                  name = "Keskiarvo (%)",
+                  cell = function(value) {
+                    if (value >= 0) paste0("+", value) else value
+                  },
+                  style = function(value) {
+                    if (value >= 20) {
+                    color <- "#b2182b"
+                  } else if (value < 20 & value >= 10) {
+                    color <- "#ef8a62"
+                  } else if (value < 10 & value >=0) {
+                    color <- "#ffce99"
+                  } else if (value < 0 & value >= -10) {
+                    color <- "#b3d9ff"
+                  } else if (value < -10 & value >= -20) {
+                    color <- "#67a9cf"
+                  } else {
+                    color <- "#2166ac"
+                  }
+                  list(color = color, fontWeight = "bold")
+                  
+                }),
+                Maksimi = colDef(
+                  name = "Maksimi (%)",
+                  cell = function(value) {
+                    if (value >= 0) paste0("+", value) else value
+                  },
+                  style = function(value) {
+                  if (value >= 20) {
+                    color <- "#b2182b"
+                  } else if (value < 20 & value >= 10) {
+                    color <- "#ef8a62"
+                  } else if (value < 10 & value >=0) {
+                    color <- "#ffce99"
+                  } else if (value < 0 & value >= -10) {
+                    color <- "#b3d9ff"
+                  } else if (value < -10 & value >= -20) {
+                    color <- "#67a9cf"
+                  } else {
+                    color <- "#2166ac"
+                  }
+                  list(color = color, fontWeight = "bold")
+                }) ,
+                
+                Minimi = colDef(
+                  name = "Minimi (%)",
+                  cell = function(value) {
+                    if (value >= 0) paste0("+", value) else value
+                  },
+                  style = function(value) {
+                  if (value >= 20) {
+                    color <- "#b2182b"
+                  } else if (value < 20 & value >= 10) {
+                    color <- "#ef8a62"
+                  } else if (value < 10 & value >=0) {
+                    color <- "#ffce99"
+                  } else if (value < 0 & value >= -10) {
+                    color <- "#b3d9ff"
+                  } else if (value < -10 & value >= -20) {
+                    color <- "#67a9cf"
+                  } else {
+                    color <- "#2166ac"
+                  }
+                  list(color = color, fontWeight = "bold")
+                })
+                
+              ),
+              
+              )
     
     
-  })
+  }) 
   
   
   # Map for page 2
@@ -302,9 +392,11 @@ server <- function(input, output){
     # Also filtering option (map_click)?
     
     leaflet() %>%
-      addProviderTiles(providers$CartoDB.Positron) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       option=leafletOptions(minZoom = 5, maxZoom = 8)) %>%
       addCircles(data = flood_1, lng = ~lat, lat = ~long,
-                 weight = 10, fill = TRUE) %>%
+                 weight = 10, fill = TRUE, label = ~htmlEscape(Nimi),
+                 labelOptions = labelOptions(textsize = "12px")) %>%
       addPolygons(data = valuma,
                   color = "#e14747",
                   weight = 1,
@@ -364,6 +456,7 @@ ui <- shinyUI(fluidPage(
   
   titlePanel(h4("Ilmastonmuutoksen vaikutus vesistöihin -visualisointityökalu")),
   
+  # First tab #########
   tabsetPanel(
     tabPanel("Muutokset virtaamissa", fluid = TRUE,
              sidebarLayout(
@@ -421,7 +514,7 @@ ui <- shinyUI(fluidPage(
                  )),
              )
     ),
-    
+    # Second tab ############
     tabPanel("Muutokset tulvissa", fluid = TRUE,
              sidebarLayout(
                sidebarPanel(
@@ -447,22 +540,23 @@ ui <- shinyUI(fluidPage(
                                  p(" "),
                                  p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden avovesitulva muuttuu enintään, vähintään ja keskimäärin valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Luvut ovat prosentteja (%)"),
                                  
-                                 DTOutput("table2",width = 650)),
+                                 reactableOutput("table2",width = 650)),
                           
                           column(4,
+                                 " ",
                                  leafletOutput("map_2", height=750))))
                  )),
                
              )
     ),
-    
-    tabPanel("Ohje ja taustaa",
+    # Third tab ##############
+    tabPanel("Lisätietoa",
              sidebarLayout(
                sidebarPanel(
                  width = 2,
                  
                  strong("Tällä sivulla:"),
-                 em("taustaa, sovelluksen käyttöohje, yhteystiedot ja palaute."),
+                 em("taustaa, lisätietoa, yhteystiedot ja palaute."),
                  helpText("Tietoa hankkeesta: ", 
                           tags$a(href= "https://www.syke.fi/fi-FI/Tutkimus__kehittaminen/Tutkimus_ja_kehittamishankkeet/Hankkeet/ClimVeTuri",
                                  "ClimVeTuri", target="_blank")),
