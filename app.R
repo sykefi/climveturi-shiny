@@ -8,7 +8,7 @@ rm(list = ls())
 
 
 # App version
-app_v <- "0007 (05.11.2020)"
+app_v <- "0008 (06.11.2020)"
 
 
 # Import libraries
@@ -57,14 +57,23 @@ flood_1 <- flood[,c(2,4:6, 10,11)]
 # 2040-69
 flood_2 <- flood[,c(2,7:9,10,11)]
 
+# Create absolute variables for mapping radius in leaflet
+flood_1$Abs_mean <- abs(flood_1$Keskiarvo)
+flood_2$Abs_mean <- abs(flood_2$Keskiarvo)
+flood_1$Abs_max <- abs(flood_1$Maksimi)
+flood_2$Abs_max <- abs(flood_2$Maksimi)
+flood_1$Abs_min <- abs(flood_1$Minimi)
+flood_2$Abs_min <- abs(flood_2$Minimi)
+
+
 flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi, 
                    flood_1 = flood_1, flood_2 = flood_2)
+
 
 
 # read geopackage
 valuma <- readOGR("data/valuma_line.gpkg")
 valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
-
 
 
 #### ---------------------------------------------------------------------------
@@ -80,6 +89,7 @@ locations <- c("Vuoksi", "Kymijoki", "Naarajärvi, Saarijärven reitti", "Konnev
 
 timeframe_names <- c("2010-2039", "2040-2069") # 1, 2
 scenario_names <- c("Usean skenaarion keskiarvo","Lämmin ja märkä", "Kylmä") # 1, 2, 3
+floodmap_names <- c("Keskiarvo (%)", "Maksimi (%)", "Minimi (%)")
 
 
 #### ShinyApp Server -----------------------------------------------------------
@@ -101,8 +111,8 @@ server <- function(input, output){
                                font.weight = "bold",
                                color = ifelse(x >= 20, "#b2182b",
                                               ifelse(x < 20 & x >= 10, "#ef8a62",
-                                                     ifelse(x < 10 & x >=0, "#ffce99",
-                                                            ifelse(x < 0 & x >= -10, "#b3d9ff",
+                                                     ifelse(x < 10 & x >=0, "#ffc999",
+                                                            ifelse(x < 0 & x >= -10, "#90D4E7",
                                                                    ifelse(x < -10 & x >= -20, "#67a9cf",
                                                                           ifelse(x <-20, "#2166ac", "black"))))))),
                              x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
@@ -234,16 +244,21 @@ server <- function(input, output){
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron,
                        option=leafletOptions(minZoom = 5, maxZoom = 8)) %>%
-      addCircles(data = flood_1, lng = ~lat, lat = ~long,
-                 weight = 10, fill = TRUE, label = ~htmlEscape(Nimi),
-                 labelOptions = labelOptions(textsize = "12px")) 
+      addCircleMarkers(data = flood_1, lng = ~lat, lat = ~long,
+                 weight = 1,
+                 radius = 5,
+                 color = "grey",
+                 fillOpacity = 0.8,
+                 stroke = FALSE,
+                 label = ~htmlEscape(Nimi),
+                 labelOptions = labelOptions(textsize = "14px")) 
 
       # addPolylines(data = valuma,
       #             color = "#e14747",
       #             weight = 1,
       #             smoothFactor = 0.5)
     
-    # to do: add legend
+    
     
     
   })
@@ -255,47 +270,15 @@ server <- function(input, output){
     leafletProxy(mapId = "map_1") %>%
       clearGroup("highlighted_point") %>%
       addCircleMarkers(data = thisPoint, lng=~lat, lat=~long,
-                       color = "yellow", group = "highlighted_point",
+                       color = "orange", group = "highlighted_point",
                        label = ~htmlEscape(Nimi),
-                       labelOptions = labelOptions(textsize = "12px"))
+                       labelOptions = labelOptions(textsize = "14px"))
   })
   
 ### Second tab with floods  ---------------------
   
   
-  # output$table2 <- renderDT({
-  #   
-  #   tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
-  #  
-  #   muutos_form <- formatter("span",
-  #                            style = x ~ style(
-  #                              font.weight = "bold",
-  #                              color = ifelse(x >= 20, "#b2182b",
-  #                                             ifelse(x < 20 & x >= 10, "#ef8a62",
-  #                                                    ifelse(x < 10 & x >=0, "#ffce99",
-  #                                                           ifelse(x < 0 & x >= -10, "#b3d9ff",
-  #                                                                  ifelse(x < -10 & x >= -20, "#67a9cf",
-  #                                                                         ifelse(x <-20, "#2166ac", "black"))))))),
-  #                            x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
-  #   )
-  #   
-  #   as.datatable(formattable(flood_list[[tableData]],
-  #               list(disp = formatter("span", 
-  #                                     style = x ~ style(
-  #                                       font.weight = "bold")),
-  #                    area(col = 2:4) ~ muutos_form)
-  #                    
-  #                   
-  #               ), 
-  #               selection ="multiple", escape=FALSE, 
-  #               options = list(sDom  = '<"top">lrt<"bottom">ip', pageLength= 27, lengthChange = FALSE,
-  #                              columnDefs = list(list(targets = c(0), type = "num-fmt"))),
-  #               rownames = FALSE)
-  #   
-  #   
-  # })
-  
-  # Flood table made with reactable https://glin.github.io/reactable/ v. 0.2.3
+    # Flood table made with reactable https://glin.github.io/reactable/ v. 0.2.3
   output$table2 <- renderReactable({
     tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
     
@@ -303,6 +286,7 @@ server <- function(input, output){
               height = 600,
               pagination = FALSE,
               highlight = TRUE,
+              defaultSortOrder = "desc",
               
               columns = list(
                 Nimi = colDef(
@@ -321,9 +305,9 @@ server <- function(input, output){
                   } else if (value < 20 & value >= 10) {
                     color <- "#ef8a62"
                   } else if (value < 10 & value >=0) {
-                    color <- "#ffce99"
+                    color <- "#FFC999"
                   } else if (value < 0 & value >= -10) {
-                    color <- "#b3d9ff"
+                    color <- "#90D4E7"
                   } else if (value < -10 & value >= -20) {
                     color <- "#67a9cf"
                   } else {
@@ -343,15 +327,15 @@ server <- function(input, output){
                   } else if (value < 20 & value >= 10) {
                     color <- "#ef8a62"
                   } else if (value < 10 & value >=0) {
-                    color <- "#ffce99"
+                    color <- "#FFC999"
                   } else if (value < 0 & value >= -10) {
-                    color <- "#b3d9ff"
+                    color <- "#90D4E7"
                   } else if (value < -10 & value >= -20) {
                     color <- "#67a9cf"
                   } else {
                     color <- "#2166ac"
                   }
-                  list(color = color, fontWeight = "bold")
+                  list(color = color)
                 }) ,
                 
                 Minimi = colDef(
@@ -365,15 +349,15 @@ server <- function(input, output){
                   } else if (value < 20 & value >= 10) {
                     color <- "#ef8a62"
                   } else if (value < 10 & value >=0) {
-                    color <- "#ffce99"
+                    color <- "#FFC999"
                   } else if (value < 0 & value >= -10) {
-                    color <- "#b3d9ff"
+                    color <- "#90D4E7"
                   } else if (value < -10 & value >= -20) {
                     color <- "#67a9cf"
                   } else {
                     color <- "#2166ac"
                   }
-                  list(color = color, fontWeight = "bold")
+                  list(color = color)
                 })
                 
               ),
@@ -386,26 +370,72 @@ server <- function(input, output){
   
   # Map for page 2
   output$map_2 <- renderLeaflet({
+    mapData <- paste("flood", input$timeframe2, sep="_")
     
-    # I want to make a map with radio buttons where user can select which column is visualized
-    # And the radius and colour is based on the value.
-    # Also filtering option (map_click)?
+    
+
     
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron,
                        option=leafletOptions(minZoom = 5, maxZoom = 8)) %>%
-      addCircles(data = flood_1, lng = ~lat, lat = ~long,
-                 weight = 10, fill = TRUE, label = ~htmlEscape(Nimi),
-                 labelOptions = labelOptions(textsize = "12px")) %>%
-      addPolygons(data = valuma,
-                  color = "#e14747",
-                  weight = 1,
-                  smoothFactor = 0.5,
-                  fill = FALSE)
+      # Default is mean
+      addCircleMarkers(data = flood_list[[mapData]], lng = ~lat, lat = ~long,
+                 weight = 1,
+                 #radius = ~flood_list[[mapData]][[col_name()]],
+                 stroke = FALSE,
+                 radius = 5,
+                 color = "grey",
+                 fillOpacity = 0.8,
+                 label = ~htmlEscape(Nimi),
+                 labelOptions = labelOptions(textsize = "14px"),
+                 #color = ~pal(flood_list[[mapData]][[col_name()]]),
+                 group = "markers") 
+      # addPolygons(data = valuma,
+      #             color = "#e14747",
+      #             weight = 1,
+      #             smoothFactor = 0.5,
+      #             fill = FALSE)
 
     
   })
   
+  # Observe input and change the visualized column
+  observeEvent(input$floodMap, {
+    
+    bins <- c(50, 0, -50)
+    cols <- c("#2166ac", "#b2182b")
+    pal <- colorBin(cols, bins = bins, pretty = FALSE)
+    
+    mapData <- paste("flood", input$timeframe2, sep="_")
+    
+    col_name <- reactive({
+      name <- input$floodMap
+      name})
+    
+    col_value <- reactive({
+      if (input$floodMap == "Abs_mean") {
+        value <- "Keskiarvo"
+      } else if (input$floodMap == "Abs_max") {
+        value <- "Maksimi"
+      } else if (input$floodMap == "Abs_min") {
+        value <- "Minimi"
+      }
+    })
+
+    leafletProxy("map_2") %>%
+      clearGroup("markers") %>%
+      addCircleMarkers(data = flood_list[[mapData]], lng = ~lat, lat = ~long,
+                       weight = 1,
+                       radius = ~flood_list[[mapData]][[col_name()]],
+                       stroke = FALSE,
+                       fillOpacity = 0.4,
+                       color = ~pal(flood_list[[mapData]][[col_value()]]),
+                       label = ~paste(Nimi, ":", flood_list[[mapData]][[col_value()]], "%"),
+                       labelOptions = labelOptions(textsize = "14px"),
+                       group = "markers") 
+
+  })
+
   
   
   # Change barplots when timeframe changes
@@ -538,13 +568,24 @@ ui <- shinyUI(fluidPage(
                                  br(),
                                  strong("Kuinka paljon keskimäärin kerran sadassa vuodessa tapahtuva tulvan (1/100a) arvioidaan muuttuvan ilmastonmuutoksen vaikutuksesta?"),
                                  p(" "),
-                                 p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden avovesitulva muuttuu enintään, vähintään ja keskimäärin valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Luvut ovat prosentteja (%)"),
+                                 p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden avovesitulva muuttuu valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Keskiarvo kertoo 25 skenaarion keskimääräisen muutoksen, maksimi ja minimi vaihteluvälin."),
                                  
                                  reactableOutput("table2",width = 650)),
                           
                           column(4,
-                                 " ",
-                                 leafletOutput("map_2", height=750))))
+                                 br(),
+                                 strong("Visualisoi muutokset tulvissa valitsemalla taso kartalta."),
+                                 p(span("Punainen", style = "color:red"), "väri viittaa positiiviseen muutokseen ja ",
+                                 span("sininen", style ="color:blue"), "negatiiviseen."),
+                                 leafletOutput("map_2", height=720),
+                                 
+                                 absolutePanel(top =100, right = -160, 
+                                               radioButtons("floodMap", "Valitse taso",
+                                                            choiceNames= floodmap_names,
+                                                            choiceValues = c("Abs_mean", "Abs_max", "Abs_min"),
+                                                            selected = character(0)),
+                                              
+                                 ))))
                  )),
                
              )
