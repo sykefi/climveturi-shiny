@@ -8,8 +8,7 @@ rm(list = ls())
 
 
 # App version
-app_v <- "0008 (06.11.2020)"
-
+app_v <- "0009 (09.11.2020)"
 
 # Import libraries
 library(shiny)
@@ -26,8 +25,11 @@ library(rgdal)
 library(ggiraph)
 library(DT)
 library(reactable)
+library(stringr)
+library(tippy)
 
 #wd <- setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
+
 
 # css path
 csspath <- "app_style.css"
@@ -72,8 +74,8 @@ flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi,
 
 
 # read geopackage
-valuma <- readOGR("data/valuma_line.gpkg")
-valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
+# valuma <- readOGR("data/valuma_line.gpkg")
+# valuma <- spTransform(valuma, CRS("+init=epsg:4326"))
 
 
 #### ---------------------------------------------------------------------------
@@ -92,43 +94,100 @@ scenario_names <- c("Usean skenaarion keskiarvo","Lämmin ja märkä", "Kylmä")
 floodmap_names <- c("Keskiarvo (%)", "Maksimi (%)", "Minimi (%)")
 
 
+
+
 #### ShinyApp Server -----------------------------------------------------------
 
 server <- function(input, output){
   
 ### First tab with discharges  ------------
   
-  # Table with % changes
-  output$table <- renderFormattable({
-    
-    
-    
+  # Table with changes in mean made with reactable https://glin.github.io/reactable/ v. 0.2.3
+  output$table1 <- renderReactable({
     thisName <- paste(input$location, input$timeframe,
                       input$scenario, "%", sep = "_")
-    # Set custom colours for % thresholds
-    muutos_form <- formatter("span", 
-                             style = x ~ style(
-                               font.weight = "bold",
-                               color = ifelse(x >= 20, "#b2182b",
-                                              ifelse(x < 20 & x >= 10, "#ef8a62",
-                                                     ifelse(x < 10 & x >=0, "#ffc999",
-                                                            ifelse(x < 0 & x >= -10, "#90D4E7",
-                                                                   ifelse(x < -10 & x >= -20, "#67a9cf",
-                                                                          ifelse(x <-20, "#2166ac", "black"))))))),
-                             x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
+    
+    chg_dfs[[thisName]] <- chg_dfs[[thisName]][, c("Virtaama_ref", "Virtaama_ilm", "Muutos")]
+    reactable(chg_dfs[[thisName]],
+              pagination = FALSE,
+              highlight = FALSE,
+              defaultSortOrder = "desc",
+              
+              columns = list(
+                Virtaama_ref = colDef(
+                  name = "Virtaama (\u33a5/s) referenssijakso",
+                  
+                ),
+                
+                Virtaama_ilm = colDef(
+                  name = "Virtaama (\u33a5/s) ilmastonmuutos",
+                  style = function(value) {
+                  list(fontWeight = "bold")
+                    }),
+                
+                Muutos = colDef(
+                  name = "Muutos",
+                  cell = function(value) {
+                    if (value >= 0) paste0("+", value, " %") else paste0(value, " %")
+                  },
+                  style = function(value) {
+                    if (value >= 20) {
+                      color <- "#b2182b"
+                    } else if (value < 20 & value >= 10) {
+                      color <- "#ef8a62"
+                    } else if (value < 10 & value >=0) {
+                      color <- "#FFC999"
+                    } else if (value < 0 & value >= -10) {
+                      color <- "#90D4E7"
+                    } else if (value < -10 & value >= -20) {
+                      color <- "#67a9cf"
+                    } else {
+                      color <- "#2166ac"
+                    }
+                    list(color = color, fontWeight = "bold")
+                  }) 
+                
+                
+                
+              ),
+              
     )
-    # Create table (33a5 is unicode for m3)
-    formattable(chg_dfs[[thisName]], col.names=c("Virtaama (\u33a5/s)", "Muutos (%)"),
-                list(disp = formatter("span", 
-                                      style = x ~ style(
-                                        font.weight = "bold")),
-                     `Virtaama` = formatter("span"),
-                     `Muutosprosentti` = muutos_form)
-                     
-                )
     
     
-  })
+  }) 
+  
+  # # Table with % changes
+  # output$table <- renderFormattable({
+  #   
+  #   
+  #   
+  #   thisName <- paste(input$location, input$timeframe,
+  #                     input$scenario, "%", sep = "_")
+  #   # Set custom colours for % thresholds
+  #   muutos_form <- formatter("span", 
+  #                            style = x ~ style(
+  #                              font.weight = "bold",
+  #                              color = ifelse(x >= 20, "#b2182b",
+  #                                             ifelse(x < 20 & x >= 10, "#ef8a62",
+  #                                                    ifelse(x < 10 & x >=0, "#ffc999",
+  #                                                           ifelse(x < 0 & x >= -10, "#90D4E7",
+  #                                                                  ifelse(x < -10 & x >= -20, "#67a9cf",
+  #                                                                         ifelse(x <-20, "#2166ac", "black"))))))),
+  #                            x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
+  #   )
+  #   # Create table (33a5 is unicode for m3)
+  #   formattable(chg_dfs[[thisName]], col.names=c("Virtaama (\u33a5/s) referenssijakso", "Virtaama (\u33a5/s) ilmastonmuutos", "Muutos (%)"),
+  #               list(disp = formatter("span", 
+  #                                     style = x ~ style(
+  #                                       font.weight = "bold")),
+  #                    `Virtaama_ref` = formatter("span"),
+  #                    `Virtaama_ilm`= formatter("span"),
+  #                    `Muutos` = muutos_form)
+  #                    
+  #               )
+  #   
+  #   
+  # })
   
   
   # Plot
@@ -153,6 +212,12 @@ server <- function(input, output){
     times <- c("1" = "2010-2039",
                "2" = "2040-2069")
     
+    m_labels <- c("tammi", "helmi", "maalis", "huhti", "touko", "kesä", "heinä", "elo", "syys", "loka", "marras", "joulu")
+    m_breaks <- c("2020-01-01", "2020-02-01","2020-03-01","2020-04-01","2020-05-01",
+                  "2020-06-01","2020-07-01","2020-08-01","2020-09-01","2020-10-01",
+                  "2020-11-01","2020-12-01")
+    
+    
    
     
     plo <- ggplot(
@@ -165,18 +230,18 @@ server <- function(input, output){
       # Control period ribbom + geom line in all of the plots
       geom_ribbon(aes(ymin=min, ymax=max, fill = "ref2"), 
                   colour = NA, alpha = 0.5) +
-      geom_line(aes(y = mean, colour = "ref1"), size = 1.4, alpha = 0.8) +
+      geom_line(aes(y = mean, colour = "ref1"), size = 1.6, alpha = 0.8) +
       
       # Changes when input changes
       geom_line(data=thisPlot, aes(y = mean, colour = as.character(input$scenario), group = 1),
-                size = 1.4, alpha = 0.8) +
+                size = 1.6, alpha = 0.8) +
       geom_ribbon(data=thisPlot, aes(ymin = min, ymax = max, colour = as.character(input$scenario), group = 1),linetype = 3,
-                  fill = NA, size = 1.2, alpha = 0.8) +
+                  fill = NA, size = 1.4, alpha = 0.8) +
       
       
       
       # x-axis
-      scale_x_date(expand = c(0,0),date_labels = "%b", date_breaks = "1 month")+
+      scale_x_date(expand = c(0,0),labels = m_labels, breaks = as.Date(m_breaks))+
       
       
       # colour & legend settings
@@ -194,9 +259,9 @@ server <- function(input, output){
       
       # Style settings
       theme(axis.title.x=element_blank(),
-            axis.text.x = element_text(size=20, face = "bold"),
-            axis.text.y = element_text(size=20),
-            axis.title.y = element_text(size = 20),
+            axis.text.x = element_text(size=25, face = "bold"),
+            axis.text.y = element_text(size=25),
+            axis.title.y = element_text(size = 25),
             panel.background = element_blank(),
             #panel.grid.major.y = element_line(colour="grey70"),
             axis.line = element_line(colour="grey"),
@@ -204,9 +269,9 @@ server <- function(input, output){
             legend.justification = c("left", "top"),
             legend.margin = margin(),
             legend.background = element_blank(),
-            legend.text = element_text(size=20),
+            legend.text = element_text(size=25),
             legend.box.background = element_rect(alpha("white", 0.3), color =NA),
-            plot.title = element_text(size=25))
+            plot.title = element_text(size=28))
     
     
     
@@ -220,7 +285,7 @@ server <- function(input, output){
     # display plot
     ggiraph(code = print(plo),
             width_svg = 16.7,
-            height_svg = 9)
+            height_svg = 11)
     
   })
   
@@ -291,13 +356,13 @@ server <- function(input, output){
               columns = list(
                 Nimi = colDef(
                   name = "Vesistö",
-                  width = 230
+                  width = 200
                 ),
                 
                 Keskiarvo = colDef(
-                  name = "Keskiarvo (%)",
+                  name = "Keskiarvo",
                   cell = function(value) {
-                    if (value >= 0) paste0("+", value) else value
+                    if (value >= 0) paste0("+", value, " %") else paste0(value, " %")
                   },
                   style = function(value) {
                     if (value >= 20) {
@@ -317,9 +382,9 @@ server <- function(input, output){
                   
                 }),
                 Maksimi = colDef(
-                  name = "Maksimi (%)",
+                  name = "Maksimi",
                   cell = function(value) {
-                    if (value >= 0) paste0("+", value) else value
+                    if (value >= 0) paste0("+", value, " %") else paste0(value, " %")
                   },
                   style = function(value) {
                   if (value >= 20) {
@@ -339,9 +404,9 @@ server <- function(input, output){
                 }) ,
                 
                 Minimi = colDef(
-                  name = "Minimi (%)",
+                  name = "Minimi",
                   cell = function(value) {
-                    if (value >= 0) paste0("+", value) else value
+                    if (value >= 0) paste0("+", value, " %") else paste0(value, " %")
                   },
                   style = function(value) {
                   if (value >= 20) {
@@ -400,6 +465,7 @@ server <- function(input, output){
   })
   
   # Observe input and change the visualized column
+  map_proxy <- leafletProxy("map_2")
   observeEvent(input$floodMap, {
     
     bins <- c(50, 0, -50)
@@ -422,11 +488,11 @@ server <- function(input, output){
       }
     })
 
-    leafletProxy("map_2") %>%
+    map_proxy %>%
       clearGroup("markers") %>%
       addCircleMarkers(data = flood_list[[mapData]], lng = ~lat, lat = ~long,
-                       weight = 1,
-                       radius = ~flood_list[[mapData]][[col_name()]],
+                       weight = 10,
+                       radius = ~sqrt(flood_list[[mapData]][[col_name()]])*5,
                        stroke = FALSE,
                        fillOpacity = 0.4,
                        color = ~pal(flood_list[[mapData]][[col_value()]]),
@@ -459,7 +525,11 @@ server <- function(input, output){
   # })
 
 
+  
+  
 }
+
+
 
 
 #### ShinyApp User Interface ---------------------------------------------------
@@ -470,9 +540,11 @@ ui <- shinyUI(fluidPage(
   theme = shinytheme("flatly"),
   
   tags$head(tags$link(rel = "stylesheet", 
-                      type = "text/css", 
-                      href = "https://use.fontawesome.com/releases/v5.13.0/css/all.css"),
+                      type = "text",
             htmltools::includeCSS(csspath)),
+            tags$style(
+              "body { word-wrap: break-word; }"
+            )),
   
   
   headerPanel(
@@ -481,14 +553,13 @@ ui <- shinyUI(fluidPage(
     windowTitle = "ClimVeTuri ilmastonmuutos"
   ),
   
-  # Import CSS style from external file
-  #tags$head(htmltools::includeCSS(csspath)),
+ 
   
   titlePanel(h4("Ilmastonmuutoksen vaikutus vesistöihin -visualisointityökalu")),
   
   # First tab #########
   tabsetPanel(
-    tabPanel("Muutokset virtaamissa", fluid = TRUE,
+    tabPanel("Ilmastonmuutos ja virtaamat", fluid = TRUE,
              sidebarLayout(
                sidebarPanel(
                  width = 2,
@@ -516,6 +587,15 @@ ui <- shinyUI(fluidPage(
                    choiceValues = seq(1:length(scenario_names))
                  ),
                  
+                 
+                 br(),
+                 strong("Lataa kuvaaja"),
+                 downloadButton("kuvaaja_lataus", class = "download_this", icon(NULL)),
+                 div(),
+                 strong("Lataa taulukko"),
+                 downloadButton("taulukko1_lataus",class = "download_this", icon(NULL)),
+                 div(),
+                 br(),
                  HTML(paste("<p id='version-info' style='color: grey; font-size: small;'>Versio<br>", 
                             app_v, "</p>")),
                ),
@@ -525,27 +605,30 @@ ui <- shinyUI(fluidPage(
                  fluidRow(
                    column(12,
                           fluidRow(
-                            column(7,
-                                   h5("Kuvaaja"),
-                                   downloadButton("kuvaaja_lataus",
-                                                  label = HTML("<i class='icon file' title='Lataa kuvaaja (png)'></i>")),
+                            column(6,
+                                   br(),
+                                   
                                    ggiraphOutput("plo", 
                                                  width = "100%",
                                                  height = "100%"),
+                                   br(),
+ 
+                                   reactableOutput("table1", width = "100%")),
                                    
-                                   h5("Taulukko"),
-                                   formattableOutput("table",width = 400)),
+                            
+                            
                                    
-                          column(4,
-                                 "Mallinnettujen virtaamapisteiden sijainti kartalla",
-                                 leafletOutput("map_1", height = 750))
+                          column(5,
+                                 br(),
+                                 p("Mallinnettujen virtaamapisteiden sijainti kartalla"),
+                                 leafletOutput("map_1", height = 750, width = "100%"))
                           ))
                    
                  )),
              )
     ),
     # Second tab ############
-    tabPanel("Muutokset tulvissa", fluid = TRUE,
+    tabPanel("Ilmastonmuutos ja tulvat", fluid = TRUE,
              sidebarLayout(
                sidebarPanel(
                  width = 2,
@@ -564,15 +647,15 @@ ui <- shinyUI(fluidPage(
                  fluidRow(
                    column(12,
                           fluidRow(
-                          column(7,
+                          column(6,
                                  br(),
                                  strong("Kuinka paljon keskimäärin kerran sadassa vuodessa tapahtuva tulvan (1/100a) arvioidaan muuttuvan ilmastonmuutoksen vaikutuksesta?"),
                                  p(" "),
-                                 p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden avovesitulva muuttuu valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Keskiarvo kertoo 25 skenaarion keskimääräisen muutoksen, maksimi ja minimi vaihteluvälin."),
+                                 p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden avovesitulva muuttuu valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Keskiarvo kertoo 25 skenaarion keskimääräisen muutoksen, maksimi on skenaarioiden suurin ja minimi pienin muutos."),
                                  
-                                 reactableOutput("table2",width = 650)),
+                                 reactableOutput("table2",width = 550)),
                           
-                          column(4,
+                          column(5,
                                  br(),
                                  strong("Visualisoi muutokset tulvissa valitsemalla taso kartalta."),
                                  p(span("Punainen", style = "color:red"), "väri viittaa positiiviseen muutokseen ja ",

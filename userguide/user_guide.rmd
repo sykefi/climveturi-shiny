@@ -9,58 +9,69 @@ date: "5 11 2020"
 
 Visualisonnit on tuotettu SYKEssä osana ympäristöministeriön ja maa- ja metsätalousministeriön rahoittamaa hanketta **Vesienhoidon ja tulvariskien hallinnan yhteensovittaminen sekä ilmastonmuutoksen huomioiminen suunnittelussa (ClimVeTuri, 2019-2020)**.
 
-**Ilmastonmuutos** vaikuttaa monin tavoin vesivarojen laatuun ja määrään. Merkittävimpiä muutoksia Suomen sisävesien hydrologisissa oloissa ovat _valunnan, virtaaminen ja vedenkorkeuksien vuodenaikaisen vaihtelun lisääntyminen_. Talviaikaisen valunnan ennakoidaan kasvavan merkittävästi lumen sulamisen ja runsastuvien vesisateiden vuoksi. Vastaavasti kevättulvat pienenevät etenkin Keski- ja Etelä-Suomessa. Valunnan kasvaessa myös ravinteiden huuhtoutuminen vesistöihin lisääntyy. Muuttuva ilmasto vaikuttaa lisäksi pohjavesivaroihin. Vaikutusten odotetaan voimistuvan olennaisesti tämä vuosisadan loppuun mennessä.
+**Ilmastonmuutos** vaikuttaa monin tavoin vesivarojen laatuun ja määrään. Merkittävimpiä muutoksia Suomen sisävesien hydrologisissa oloissa ovat _valunnan, virtaaminen ja vedenkorkeuksien vuodenaikaisen vaihtelun lisääntyminen_. Talviaikaisen valunnan ennakoidaan kasvavan merkittävästi lumen sulamisen ja runsastuvien vesisateiden vuoksi. Vastaavasti kevättulvat pienenevät etenkin Keski- ja Etelä-Suomessa. Muuttuva ilmasto vaikuttaa lisäksi veden laatuun ja pohjavesivaroihin. Vaikutusten odotetaan voimistuvan olennaisesti tämä vuosisadan loppuun mennessä. Ilmastonmuutos ja sen vaikutukset vesien kuormitukseen ja tulvariskeihin ovat keskeisiä kysymyksiä vesienhoidossa ja tulvariskien hallinnassa.  
 
-Ilmastonmuutos ja sen vaikutukset vesien kuormitukseen ja tulvariskeihin ovat keskeisiä kysymyksiä vesienhoidossa ja tulvariskien hallinnassa. Ilmastonmuutoksen aiheuttamista kuormitusmuutoksista tulisi saada entistä tarkempaa tietoa. Lisäksi olisi kehitettävä arviointitapoja, jotka ottavat huomioon sekä vesienhoidon että tulvariskien hallinnan tavoitteet ja muuttuvat ilmasto-olot pidemmällä aikavälillä.
+Tässä sovelluksessa on mahdollista visualisoida ilmastonmuutoksen vaikutuksia vesistöjen virtaamiin ja tulviin eri puolilla Suomea eri hydrologisten skenaarioiden avulla vuoteen 2069 saakka. Visualisoinnit ovat interaktiivisia ja mahdollistavat vertailun eri aikasarjojen ja ilmastoskenaarioiden välillä. Kuvaajia voi myös ladata omalle työasemalle.
 
-Tässä sovelluksessa on mahdollista visualisoida ilmastonmuutoksen vaikutuksia vesistöihin eri puolilla Suomea eri hydrologisten skenaarioiden avulla vuoteen 2069 saakka. Visualisoinnit ovat interaktiivisia ja  mahdollistavat vertailun eri aikasarjojen ja ilmastonmuutosskenaarioiden välillä. Kuvaajia voi myös ladata omalle työasemalle.
+*Tähän on tulossa mahdollisesti kuva.*
 
 ***
 
 ### Aineisto
-Hydrologinen aineisto perustuu SYKEn tekemiin mittauksiin eri virtaamapisteillä vuosina 1981-2010, sekä tästä referenssiaineistosta tehtyihin ilmastonmuutossimulaatioihin aina vuodelle 2069 saakka.
+Esitetyt hydrologiset skenaariot perustuvat SYKEn Vesistömallijärjestelmän simuloimiin virtaamiin eri jokipisteillä referenssijaksolla 1981-2010, sekä kahdella eri tulevaisuuden jaksolla 2010-2039 ja 2040-2069. Malli on simuloinut referenssijaksolle virtaamien arvot, jotka perustuvat malliin syötettyihin tietoihin. Lähtötietoina on käytetty referenssijakson (1981-2010) aikana havaittuja lämpötiloja ja sadantaa sekä muita meteorologisia muuttujia. Tulevaisuuden jaksot on laskettu muuttamalla referenssijakson lämpötiloja ja sadantoja vastaamaan eri ilmastoskenaarioita.  
 
-Tietoa skenaarioista?
+Päivittäisten virtaamien osalta tulokset on esitetty kolmella eri skenaariolla (keskimääräinen eli usean ilmastomallin keskiarvo, lämmin ja märkä skenaario sekä kylmä). Nämä on valittu suuremmasta joukosta ilmastoskenaariota edustamaan ilmastonmuutoksen keskitasoa ja ääriarvoja.  
+
+Tulvien osalta tulokset perustuvat 25 skenaarion joukkoon, joista on laskettu tulvien keskimääräinen sekä maksimi- ja minimimuutos.  
+
+Ilmastoskenaarioihin liittyy merkittävää epävarmuutta, jonka vuoksi on hyvä tarkastella useampaa skenaariota ja varautua erityyppisiin muutoksiin samanaikaisesti.
+
+
 
 ***
 
 ### Sovelluksen käyttö
 
-Sovelluksessa on kaksi välilehteä, josta toisessa visualisoidaan ilmastonmuutoksen vaikutuksia virtaamiin, ja toisessa tulviin.  
+
+*Tämä osio varmaankin siirtyy 1 ja 2 välilehdille infolaatikkoihin/tooltipseihin.*  
+
+Sovelluksessa on kaksi välilehteä, joista toisessa visualisoidaan ilmastonmuutoksen vaikutuksia virtaamiin, ja toisessa tulviin.  
 
 #### Muutokset virtaamissa
 Ensimmäisellä välilehdellä käyttäjä voi valita sivupaneelista tarkasteluun vesialueen, ajanjakson ja skenaarion.  
 
-1. **Valitse vesistöalue alasvetovalikosta**. Kohteita on yhteensä 27. Visualisointiin on valittu vesistöjä, jotka ovat mahdollisimman vähän säännösteltyjä.  
+1. **Valitse vesistöalue alasvetovalikosta**. Kohteita on yhteensä 27. Visualisointiin on valittu vesistöjä, jotka ovat mahdollisimman vähän säännösteltyjä muutamaa poikkeusta lukuunottamatta. Näitä ovat Oulujoki, Merikoski ja Paatsjoki, Kaitakoski. Esimerkiksi Oulujoen säännöstely vaikuttaa virtaamaan.  
 
 2. **Valitse ajanjakso.** Valittavana on ilmastonmuutos vuosille 2010-2039 sekä 2040-2069. Huomioi, että osa ennustetusta kasvusta  on jo tapahtunut viimeisen kymmenen vuoden aikana, sillä referenssijaksona on käytetty vuosia 1981-2010.  
 
 3. **Valitse ilmastonmuutosskenaario.**
 
+* *Usean skenaarion keskiarvo*
+  + Usean ilmastonmuutosskenaarion keskiarvo RCP4.5 päästöskenaariolla
+  + Kuvaa ilmastoskenaarioiden mukaista keskimääräistä muutosta, ns. keskiarvoskenaario  
 * *Lämmin ja märkä*
   + MIROC-ESM-CHEM globaali ilmastomalli RCP4.5 päästöskenaariolla
-  + Ääriskenaario: suuret päästöt ja suuret lämpötilan nousut  
+  + Ääriskenaario: suuret lämpötilan nousut ja melko suuret sadannan kasvut 
 * *Kylmä*
   + CESM1_CAM5 globaali ilmastomalli RCP2.6 päästöskenaariolla
   + Ääriskenaario: pienet päästöt ja pienet lämpötilan nousut  
-* *Usean skenaarion keskiarvo*
-  + Usean ilmastonmuutosskenaarion keskiarvo RCP4.5 päästöskenaariolla  
+  
 
 ##### **Kuvaaja**
 Valittujen muuttujien avulla piirtyy kuvaaja, jossa näkyvät:
-* Valitun vesistön, ajanjakson ja skenaarion simuloidut päivittäisten virtaamien keskiarvo sekä vaihteluväli (maksimi-minimi).
+* Valitun vesistön, ajanjakson ja skenaarion simuloidut päivittäisten virtaamien keskiarvo sekä vaihteluväli (maksimi-minimi) 30 vuoden jaksolta.
 * Taustalla harmaalla värillä referenssijakson (1981-2010) päivittäisten virtaamien keskiarvo sekä vaihteluväli (maksimi-minimi).
 * Kuvaajan x-akselilla ovat kuukaudet tammikuusta joulukuuhun, ja y-akselilla virtaama.
-* Tulosten tulkinnassa on hyvä muistaa, että osa ennustetusta kasvusta  on jo tapahtunut viimeisen kymmenen vuoden aikana, sillä referenssijaksona on käytetty vuosia 1981-2010.
+* Tulosten tulkinnassa on hyvä muistaa että myös referenssijakson virtaamat ovat mallin simuloimia arvoja, ja voivat poiketa havaituista virtaamista johtuen mm. Vesistömallin laskennasta, sadanta- ja lämpötilahavainnoista ja vesistöjen säännöstelystä.
 
 
 ##### **Taulukko**
-* Vuosittaiset keskiarvot, vuodenaikaiset keskiarvot, keskiyli- ja alivirtaamat 
-* tulosten tulkinnassa on hyvä muistaa, että osa ennustetusta kasvusta  on jo tapahtunut viimeisen kymmenen vuoden aikana, sillä referenssijaksona on käytetty vuosia 1981-2010
+* Vuosittaiset keskiarvot, vuodenaikaiset keskiarvot, keskiyli- ja alivirtaamat (eli 30 vuoden jakson keskimääräinen ylin ja alin virtaama) 
+* tulosten tulkinnassa on hyvä muistaa, että osa ennustetusta kasvusta  on jo tapahtunut viimeisen kymmenen vuoden aikana, sillä referenssijaksona on käytetty vuosia 1981-2010.  
 
 
 #### Muutokset tulvissa
-Toisella välilehdellä käyttäjä voi valita sivupaneelista ajankohdan, ja tarkastella ilmastonmuutoksen vaikutusta kerran sadassa vuodessa tapahtuviin tulviin eri puolilla Suomea. Analyysissä on laskettu 25 eri ilmastonmuutosskenaarion keskimääräinen muutos.  
+Toisella välilehdellä käyttäjä voi valita sivupaneelista ajankohdan, ja tarkastella ilmastonmuutoksen vaikutusta kerran sadassa vuodessa tapahtuviin tulviin eri puolilla Suomea. Analyysissä on laskettu 25 eri ilmastoskenaarion keskimääräinen muutos referenssijaksoon 1981-2010 verrattuna sekä maksimi- ja minimimuutos (mahdollinen vaihteluväli). Tulvien muutokseen liittyy suurta epävarmuutta, mikä tulisi huomioida tulosten tulkinnassa.
 
 
 ##### **Taulukot?**  
@@ -84,12 +95,10 @@ Tutkittua tietoa ilmastonmuutoksesta koottuna yhdelle sivustolle: <a href="https
 Ajankohtaista vesitietoa Suomesta: <a href="https://www.vesi.fi/" target="_blank">vesi.fi</a>  
 
 
-
-
 ***
 <br>
-### Yhteystiedot ja palaute
-Jos ongelmia sivuston kanssa tai kysymyksiä, niin voi olla yhteydessä NN
+#### Yhteystiedot ja palaute
+Jos ongelmia sivuston kanssa tai kysymyksiä, niin voi olla yhteydessä NN.
 <br>
 
 ***
