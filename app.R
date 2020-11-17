@@ -16,7 +16,6 @@ library(ggplot2)
 library(dplyr)
 library(reshape2)
 library(data.table)
-library(formattable)
 library(shinythemes)
 library(shinyjs)
 library(htmltools)
@@ -27,6 +26,7 @@ library(DT)
 library(reactable)
 library(stringr)
 library(tippy)
+library(shinyBS)
 
 #wd <- setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 
@@ -34,7 +34,7 @@ library(tippy)
 # css path
 csspath <- "app_style.css"
 
-### load data -------------------------------------------------------------
+### Load & wrangle data ------------------------------------------------------------------
 
 # Plots and tables
 ref_list <- readRDS("data/ref_list.rds")
@@ -42,7 +42,8 @@ scen_list <- readRDS("data/scen_list.rds")
 chg_dfs <- readRDS("data/chg_dfs.rds")
 
 # Flood data
-flood <- read.table("data/flood_coord_proj.txt", dec = ",", sep = "\t", header=TRUE, stringsAsFactors = FALSE, encoding = "UTF-8")
+flood <- read.table("data/flood_coord_proj.txt", dec = ",", sep = "\t", 
+                    header=TRUE, stringsAsFactors = FALSE, encoding = "UTF-8")
 flood <- flood[,c(1,2,3,6,4,5,9,7,8,11,10)] 
 flood[,c(3:9)] <- round(flood[,c(3:9)], 0)
 names(flood) <- c("ID", "Nimi", "Alue", "Keskiarvo","Maksimi","Minimi", 
@@ -67,11 +68,9 @@ flood_2$Abs_max <- abs(flood_2$Maksimi)
 flood_1$Abs_min <- abs(flood_1$Minimi)
 flood_2$Abs_min <- abs(flood_2$Minimi)
 
-
+# Append to list
 flood_list <- list(flood_1_nimi = flood_1_nimi, flood_2_nimi = flood_2_nimi, 
                    flood_1 = flood_1, flood_2 = flood_2)
-
-
 
 # read geopackage
 # valuma <- readOGR("data/valuma_line.gpkg")
@@ -94,11 +93,11 @@ scenario_names <- c("Usean skenaarion keskiarvo","Lämmin ja märkä", "Kylmä")
 floodmap_names <- c("Keskiarvo (%)", "Maksimi (%)", "Minimi (%)")
 
 
-
-
 #### ShinyApp Server -----------------------------------------------------------
 
 server <- function(input, output){
+  
+  
   
 ### First tab with discharges  ------------
   
@@ -111,7 +110,7 @@ server <- function(input, output){
     reactable(chg_dfs[[thisName]],
               pagination = FALSE,
               highlight = FALSE,
-              defaultSortOrder = "desc",
+              sortable = FALSE,
               
               columns = list(
                 Virtaama_ref = colDef(
@@ -155,39 +154,6 @@ server <- function(input, output){
     
     
   }) 
-  
-  # # Table with % changes
-  # output$table <- renderFormattable({
-  #   
-  #   
-  #   
-  #   thisName <- paste(input$location, input$timeframe,
-  #                     input$scenario, "%", sep = "_")
-  #   # Set custom colours for % thresholds
-  #   muutos_form <- formatter("span", 
-  #                            style = x ~ style(
-  #                              font.weight = "bold",
-  #                              color = ifelse(x >= 20, "#b2182b",
-  #                                             ifelse(x < 20 & x >= 10, "#ef8a62",
-  #                                                    ifelse(x < 10 & x >=0, "#ffc999",
-  #                                                           ifelse(x < 0 & x >= -10, "#90D4E7",
-  #                                                                  ifelse(x < -10 & x >= -20, "#67a9cf",
-  #                                                                         ifelse(x <-20, "#2166ac", "black"))))))),
-  #                            x ~ icontext(ifelse(x>0, "arrow-up", "arrow-down"), x)
-  #   )
-  #   # Create table (33a5 is unicode for m3)
-  #   formattable(chg_dfs[[thisName]], col.names=c("Virtaama (\u33a5/s) referenssijakso", "Virtaama (\u33a5/s) ilmastonmuutos", "Muutos (%)"),
-  #               list(disp = formatter("span", 
-  #                                     style = x ~ style(
-  #                                       font.weight = "bold")),
-  #                    `Virtaama_ref` = formatter("span"),
-  #                    `Virtaama_ilm`= formatter("span"),
-  #                    `Muutos` = muutos_form)
-  #                    
-  #               )
-  #   
-  #   
-  # })
   
   
   # Plot
@@ -242,7 +208,6 @@ server <- function(input, output){
       
       # x-axis
       scale_x_date(expand = c(0,0),labels = m_labels, breaks = as.Date(m_breaks))+
-      
       
       # colour & legend settings
       scale_colour_manual(name = " ", values = cols,
@@ -317,7 +282,6 @@ server <- function(input, output){
                  stroke = FALSE,
                  label = ~htmlEscape(Nimi),
                  labelOptions = labelOptions(textsize = "14px")) 
-
       # addPolylines(data = valuma,
       #             color = "#e14747",
       #             weight = 1,
@@ -343,7 +307,7 @@ server <- function(input, output){
 ### Second tab with floods  ---------------------
   
   
-    # Flood table made with reactable https://glin.github.io/reactable/ v. 0.2.3
+  # Flood table made with reactable https://glin.github.io/reactable/ v. 0.2.3
   output$table2 <- renderReactable({
     tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
     
@@ -437,9 +401,7 @@ server <- function(input, output){
   output$map_2 <- renderLeaflet({
     mapData <- paste("flood", input$timeframe2, sep="_")
     
-    
 
-    
     leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron,
                        option=leafletOptions(minZoom = 5, maxZoom = 8)) %>%
@@ -504,28 +466,6 @@ server <- function(input, output){
 
   
   
-  # Change barplots when timeframe changes
-  # Edit so that default is 2010-39, now default is nothing
-  # maybe checkbox?
-
-  # observeEvent(input$timeframe2, {
-  # 
-  #   mapData <- flood_list[[paste("flood", input$timeframe2, sep="_")]]
-  # 
-  #   colors <- c("#ebdc87", "#ef8a62", "#67a9cf")
-  # 
-  #   leafletProxy("map", data = mapData) %>%
-  #     
-  #     addMinicharts(mapData$lat, mapData$long,
-  #                   type = "bar",
-  #                   chartdata = mapData[,c(2:4)],
-  #                   colorPalette = colors,
-  #                   width = 50,
-  #                   height = 60)
-  # })
-
-
-  
   
 }
 
@@ -548,14 +488,13 @@ ui <- shinyUI(fluidPage(
   
   
   headerPanel(
-    title=tags$a(href='https://www.syke.fi/fi-FI',tags$img(src='SYKE_tunnus_rgb_vaaka.png', 
-                                                           height = 50*0.75, width = 182*0.75), target="_blank"),
-    windowTitle = "ClimVeTuri ilmastonmuutos"
-  ),
-  
- 
+    title=tags$a(href='https://www.syke.fi/fi-FI',
+                 tags$img(src='SYKE_tunnus_rgb_vaaka.png',
+                          height = 50*0.75, width = 182*0.75), target="_blank"),
+    windowTitle = "ClimVeTuri ilmastonmuutos"),
   
   titlePanel(h4("Ilmastonmuutoksen vaikutus vesistöihin -visualisointityökalu")),
+  
   
   # First tab #########
   tabsetPanel(
@@ -567,33 +506,37 @@ ui <- shinyUI(fluidPage(
                  
                  helpText("Visualisoi ilmastonmuutoksen vaikutuksia vesistöjen virtaamiin eri ajanjaksoilla ja skenaarioilla."),
                  
+                 tags$div(title= "Valitse vesistö, jolla sijaitsevan virtaamapisteen tuloksia visualisoidaan.",
+                          selectInput(inputId = "location",
+                                      label = HTML("Valitse vesistö"),
+                                      choices = locations)),
+             
+                 tags$div(title="Valitse yksi kahdesta tulevaisuuden ajanjaksosta.", 
+                          radioButtons(
+                            inputId = "timeframe",
+                            label = "Valitse ajanjakso",
+                            choiceNames = timeframe_names,
+                            choiceValues = seq(1:length(timeframe_names))
+                 )),
                  
-                 selectInput(
-                   inputId = "location", 
-                   label = HTML("Valitse vesistö"),
-                   choices = locations),
+                
+                 tags$div(title= "Valitse yksi kolmesta skenaariovaihtoehdosta. Lisätietoa skenaarioista löydät Lisätietoa-välilehdeltä.",
+                          radioButtons(inputId = "scenario",label = "Valitse skenaario", 
+                                       choiceNames = scenario_names,
+                                       choiceValues = seq(1:length(scenario_names))
+                 )),
                  
-                 radioButtons(
-                   inputId = "timeframe",
-                   label = "Valitse ajanjakso",
-                   choiceNames = timeframe_names,
-                   choiceValues = seq(1:length(timeframe_names))
-                 ),
-                 
-                 radioButtons(
-                   inputId = "scenario",
-                   label = "Valitse skenaario",
-                   choiceNames = scenario_names,
-                   choiceValues = seq(1:length(scenario_names))
-                 ),
-                 
-                 
+                 # Download plot & table
                  br(),
                  strong("Lataa kuvaaja"),
-                 downloadButton("kuvaaja_lataus", class = "download_this", icon(NULL)),
+                 tags$div(title="Lataa näytöllä oleva kuvaaja työasemalle png-muodossa.",
+                          downloadButton("kuvaaja_lataus", class = "download_this", icon(NULL))),
+                 
                  div(),
                  strong("Lataa taulukko"),
-                 downloadButton("taulukko1_lataus",class = "download_this", icon(NULL)),
+                 tags$div(title= "Lataa näytöllä oleva taulukko työasemalle csv-muodossa.",
+                          downloadButton("taulukko1_lataus",class = "download_this", icon(NULL))),
+                
                  div(),
                  br(),
                  HTML(paste("<p id='version-info' style='color: grey; font-size: small;'>Versio<br>", 
@@ -614,10 +557,7 @@ ui <- shinyUI(fluidPage(
                                    br(),
  
                                    reactableOutput("table1", width = "100%")),
-                                   
-                            
-                            
-                                   
+        
                           column(5,
                                  br(),
                                  p("Mallinnettujen virtaamapisteiden sijainti kartalla"),
@@ -653,14 +593,14 @@ ui <- shinyUI(fluidPage(
                                  p(" "),
                                  p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden avovesitulva muuttuu valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Keskiarvo kertoo 25 skenaarion keskimääräisen muutoksen, maksimi on skenaarioiden suurin ja minimi pienin muutos."),
                                  
-                                 reactableOutput("table2",width = 550)),
+                                 reactableOutput("table2", width = "100%")),
                           
                           column(5,
                                  br(),
                                  strong("Visualisoi muutokset tulvissa valitsemalla taso kartalta."),
-                                 p(span("Punainen", style = "color:red"), "väri viittaa positiiviseen muutokseen ja ",
-                                 span("sininen", style ="color:blue"), "negatiiviseen."),
-                                 leafletOutput("map_2", height=720),
+                                 p(span(strong("Punainen", style = "color:#b2182b")), "väri viittaa tulvien kasvuun ja ",
+                                 span(strong("sininen", style ="color:#2166ac")), "vähenemiseen."),
+                                 leafletOutput("map_2", height=720, width = "100%"),
                                  
                                  absolutePanel(top =100, right = -160, 
                                                radioButtons("floodMap", "Valitse taso",

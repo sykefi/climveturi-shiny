@@ -5,6 +5,7 @@ date: "5 11 2020"
 
 ---
 <br>
+
 ### Taustatietoa 
 
 Visualisonnit on tuotettu SYKEssä osana ympäristöministeriön ja maa- ja metsätalousministeriön rahoittamaa hanketta **Vesienhoidon ja tulvariskien hallinnan yhteensovittaminen sekä ilmastonmuutoksen huomioiminen suunnittelussa (ClimVeTuri, 2019-2020)**.
@@ -13,7 +14,9 @@ Visualisonnit on tuotettu SYKEssä osana ympäristöministeriön ja maa- ja mets
 
 Tässä sovelluksessa on mahdollista visualisoida ilmastonmuutoksen vaikutuksia vesistöjen virtaamiin ja tulviin eri puolilla Suomea eri hydrologisten skenaarioiden avulla vuoteen 2069 saakka. Visualisoinnit ovat interaktiivisia ja mahdollistavat vertailun eri aikasarjojen ja ilmastoskenaarioiden välillä. Kuvaajia voi myös ladata omalle työasemalle.
 
-*Tähän on tulossa mahdollisesti kuva.*
+
+![Kuva 1.](ilmastonmuutos_vesisto.png)
+Kuva 1. Ilmastonmuutoksen vaikutukset valuntaan ja vesistöjen virtaamiin Suomessa. 
 
 ***
 
