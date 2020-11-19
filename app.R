@@ -8,7 +8,7 @@ rm(list = ls())
 
 
 # App version
-app_v <- "0009 (09.11.2020)"
+app_v <- "0010 (19.11.2020)"
 
 # Import libraries
 library(shiny)
@@ -27,6 +27,7 @@ library(reactable)
 library(stringr)
 library(tippy)
 library(shinyBS)
+library(crosstalk)
 
 #wd <- setwd("C:/Users/e1007642/Documents/ClimVeturi/git/shiny")
 
@@ -95,7 +96,7 @@ floodmap_names <- c("Keskiarvo (%)", "Maksimi (%)", "Minimi (%)")
 
 #### ShinyApp Server -----------------------------------------------------------
 
-server <- function(input, output){
+server <- function(input, output, session){
   
   
   
@@ -234,7 +235,7 @@ server <- function(input, output){
             legend.justification = c("left", "top"),
             legend.margin = margin(),
             legend.background = element_blank(),
-            legend.text = element_text(size=25),
+            legend.text = element_text(size=30),
             legend.box.background = element_rect(alpha("white", 0.3), color =NA),
             plot.title = element_text(size=28))
     
@@ -268,7 +269,7 @@ server <- function(input, output){
   )
   
   # Map for page 1: locations
-  output$map_1 <- renderLeaflet({
+  output$map1 <- renderLeaflet({
     
     
     leaflet() %>%
@@ -277,18 +278,17 @@ server <- function(input, output){
       addCircleMarkers(data = flood_1, lng = ~lat, lat = ~long,
                  weight = 1,
                  radius = 5,
-                 color = "grey",
+                 color = "#3275B8",
                  fillOpacity = 0.8,
                  stroke = FALSE,
                  label = ~htmlEscape(Nimi),
-                 labelOptions = labelOptions(textsize = "14px")) 
+                 labelOptions = labelOptions(textsize = "14px"),
+                 layerId = locations) 
       # addPolylines(data = valuma,
       #             color = "#e14747",
       #             weight = 1,
       #             smoothFactor = 0.5)
-    
-    
-    
+
     
   })
   
@@ -296,13 +296,25 @@ server <- function(input, output){
   observe({
     thisPoint <- subset(flood_1, flood_1$Nimi == input$location)
 
-    leafletProxy(mapId = "map_1") %>%
+    leafletProxy(mapId = "map1") %>%
       clearGroup("highlighted_point") %>%
       addCircleMarkers(data = thisPoint, lng=~lat, lat=~long,
-                       color = "orange", group = "highlighted_point",
+                       color = "#275A90", group = "highlighted_point",
                        label = ~htmlEscape(Nimi),
-                       labelOptions = labelOptions(textsize = "14px"))
+                       labelOptions = labelOptions(textsize = "14px")
+                       )
   })
+  
+  # Update the location selectInput on map click (https://www.r-bloggers.com/2016/03/r-shiny-leaflet-using-observers/)
+  
+  observeEvent(input$map1_marker_click, { 
+    p <- input$map1_marker_click
+    if(!is.null(p$id)){
+      if(is.null(input$location) || input$location!=p$id) updateSelectInput(session, "location", selected=p$id)
+    }
+  })
+  
+  
   
 ### Second tab with floods  ---------------------
   
@@ -311,7 +323,7 @@ server <- function(input, output){
   output$table2 <- renderReactable({
     tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
     
-    reactable(flood_list[[tableData]],
+    reactable(SharedData$new(flood_list[[tableData]], group ="floods"),
               height = 600,
               pagination = FALSE,
               highlight = TRUE,
@@ -398,7 +410,7 @@ server <- function(input, output){
   
   
   # Map for page 2
-  output$map_2 <- renderLeaflet({
+  output$map2 <- renderLeaflet({
     mapData <- paste("flood", input$timeframe2, sep="_")
     
 
@@ -411,27 +423,32 @@ server <- function(input, output){
                  #radius = ~flood_list[[mapData]][[col_name()]],
                  stroke = FALSE,
                  radius = 5,
-                 color = "grey",
+                 color = "#3275B8",
                  fillOpacity = 0.8,
                  label = ~htmlEscape(Nimi),
                  labelOptions = labelOptions(textsize = "14px"),
                  #color = ~pal(flood_list[[mapData]][[col_name()]]),
                  group = "markers") 
-      # addPolygons(data = valuma,
-      #             color = "#e14747",
-      #             weight = 1,
-      #             smoothFactor = 0.5,
-      #             fill = FALSE)
+      
 
     
   })
   
-  # Observe input and change the visualized column
-  map_proxy <- leafletProxy("map_2")
+  # # Highlight row on table based on map click event
+  # observeEvent(input$map2_marker_click, { 
+  #   f <- input$map1_marker_click
+  #   if(!is.null(f$id)){
+  #     if(is.null(input$location) || input$location!=f$id) 
+  #       updateReactable("table2", selected=f$id,)
+  #   }
+  # })
+  
+  # Observe input and change the visualized column NEEDS MODIFICATION
+  map_proxy <- leafletProxy("map2")
   observeEvent(input$floodMap, {
     
     bins <- c(50, 0, -50)
-    cols <- c("#2166ac", "#b2182b")
+    cols <- c("#3275B8", "#b2182b")
     pal <- colorBin(cols, bins = bins, pretty = FALSE)
     
     mapData <- paste("flood", input$timeframe2, sep="_")
@@ -477,23 +494,19 @@ ui <- shinyUI(fluidPage(
   
   
   useShinyjs(),
-  theme = shinytheme("flatly"),
+  theme = "app_style.css",
   
   tags$head(tags$link(rel = "stylesheet", 
-                      type = "text",
+                      type = "text/css",
+                      href="//fonts.googleapis.com/css?family=Raleway"),
             htmltools::includeCSS(csspath)),
-            tags$style(
-              "body { word-wrap: break-word; }"
-            )),
   
   
   headerPanel(
-    title=tags$a(href='https://www.syke.fi/fi-FI',
-                 tags$img(src='SYKE_tunnus_rgb_vaaka.png',
-                          height = 50*0.75, width = 182*0.75), target="_blank"),
-    windowTitle = "ClimVeTuri ilmastonmuutos"),
+    title=tags$a(href='https://www.syke.fi/fi-FI', target="_blank"),
+    windowTitle = "Ilmastonmuutoksen vaikutus vesistöihin"),
   
-  titlePanel(h4("Ilmastonmuutoksen vaikutus vesistöihin -visualisointityökalu")),
+  titlePanel(h3("Ilmastonmuutoksen vaikutus vesistöihin -visualisointityökalu")),
   
   
   # First tab #########
@@ -509,7 +522,8 @@ ui <- shinyUI(fluidPage(
                  tags$div(title= "Valitse vesistö, jolla sijaitsevan virtaamapisteen tuloksia visualisoidaan.",
                           selectInput(inputId = "location",
                                       label = HTML("Valitse vesistö"),
-                                      choices = locations)),
+                                      choices = locations,
+                                      selected = "")),
              
                  tags$div(title="Valitse yksi kahdesta tulevaisuuden ajanjaksosta.", 
                           radioButtons(
@@ -528,14 +542,13 @@ ui <- shinyUI(fluidPage(
                  
                  # Download plot & table
                  br(),
-                 strong("Lataa kuvaaja"),
+                 strong("Latauslinkit"),
                  tags$div(title="Lataa näytöllä oleva kuvaaja työasemalle png-muodossa.",
-                          downloadButton("kuvaaja_lataus", class = "download_this", icon(NULL))),
+                          downloadLink("kuvaaja_lataus", label = "Lataa kuvaaja (png)")),
                  
                  div(),
-                 strong("Lataa taulukko"),
                  tags$div(title= "Lataa näytöllä oleva taulukko työasemalle csv-muodossa.",
-                          downloadButton("taulukko1_lataus",class = "download_this", icon(NULL))),
+                          downloadLink("taulukko1_lataus", label = "Lataa taulukko (csv)")),
                 
                  div(),
                  br(),
@@ -550,18 +563,17 @@ ui <- shinyUI(fluidPage(
                           fluidRow(
                             column(6,
                                    br(),
-                                   
                                    ggiraphOutput("plo", 
                                                  width = "100%",
                                                  height = "100%"),
                                    br(),
- 
                                    reactableOutput("table1", width = "100%")),
         
                           column(5,
                                  br(),
                                  p("Mallinnettujen virtaamapisteiden sijainti kartalla"),
-                                 leafletOutput("map_1", height = 750, width = "100%"))
+                                 
+                                 leafletOutput("map1", height = 750, width = "100%"))
                           ))
                    
                  )),
@@ -599,8 +611,8 @@ ui <- shinyUI(fluidPage(
                                  br(),
                                  strong("Visualisoi muutokset tulvissa valitsemalla taso kartalta."),
                                  p(span(strong("Punainen", style = "color:#b2182b")), "väri viittaa tulvien kasvuun ja ",
-                                 span(strong("sininen", style ="color:#2166ac")), "vähenemiseen."),
-                                 leafletOutput("map_2", height=720, width = "100%"),
+                                 span(strong("sininen", style ="color:#3275B8")), "vähenemiseen."),
+                                 leafletOutput("map2", height=750, width = "100%"),
                                  
                                  absolutePanel(top =100, right = -160, 
                                                radioButtons("floodMap", "Valitse taso",
@@ -637,11 +649,6 @@ ui <- shinyUI(fluidPage(
     
   ))
 ))
-
-
-
-
-
 
 
 

@@ -1,14 +1,52 @@
-text {
-  font-family: helvetica,arial,sans-serif;
-  pointer-events: none;
-}
-.download_this{
-    height:40px;
-    width:57px;
-    color: #3275B8;
-    padding-top: 3px;
-    background-color: #00000000;
-    border-color: #00000000;
- 
+/* CSS style sheet for ClimVeturi shiny app */
+
+* { 
+  font-family: Raleway !important;
+   
+  }
+
+
+h4 { 
+  font-family: Raleway; 
+  font-size: 15.19px; 
+  font-style: normal; 
+  text-align: left;
+  color: #275A90;
+  font-weight: 400; 
+  line-height: 15.4px; }
+  
+h3 { 
+  font-family: Raleway; 
+  font-size: 22.39px; 
+  font-style: normal; 
+  text-align: left;
+  color: #000000;
+  font-weight: 400; 
+  line-height: 15.4px; }
+  
+p { 
+  font-family: Raleway; 
+  font-size: 14px; 
+  font-style: normal; 
+  font-variant: normal; 
+  font-weight: 400; 
+  line-height: 20px; } 
+  
+  
+/* Download button icon if needed: https://fontawesome.com/icons/download */
+
+.icon::before {
+    font-family: "Font Awesome 5 Free";
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+	font-weight: 900; /* solid */
+	font-size: 1.0em;
 }
 
+.download::before {
+	content: "\f019";
+	
+}

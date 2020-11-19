@@ -15,8 +15,6 @@ Visualisonnit on tuotettu SYKEssä osana ympäristöministeriön ja maa- ja mets
 Tässä sovelluksessa on mahdollista visualisoida ilmastonmuutoksen vaikutuksia vesistöjen virtaamiin ja tulviin eri puolilla Suomea eri hydrologisten skenaarioiden avulla vuoteen 2069 saakka. Visualisoinnit ovat interaktiivisia ja mahdollistavat vertailun eri aikasarjojen ja ilmastoskenaarioiden välillä. Kuvaajia voi myös ladata omalle työasemalle.
 
 
-![Kuva 1.](ilmastonmuutos_vesisto.png)
-Kuva 1. Ilmastonmuutoksen vaikutukset valuntaan ja vesistöjen virtaamiin Suomessa. 
 
 ***
 
@@ -99,9 +97,13 @@ Ajankohtaista vesitietoa Suomesta: <a href="https://www.vesi.fi/" target="_blank
 
 
 ***
-<br>
+
 #### Yhteystiedot ja palaute
-Jos ongelmia sivuston kanssa tai kysymyksiä, niin voi olla yhteydessä NN.
+
+Keräämme mieluusti palautetta liittyen sivuston sisältöön ja ominaisuuksiin. Mikäli sinulla on ajatuksia ja ideoita, niin klikkaa <a href="https://www.docs.google.com/forms/d/e/1FAIpQLSfzuXdt-UCY9ZlbeuyZovrnUQHaZdHaopblKJMhvc-6IauvtA/viewform?usp=sf_link" target="_blank">palautelinkkiä</a> ja jaa kommentit kanssamme.  
+ 
+Teknisissä asioissa voi olla yhteydessä sähköpostitse: sara.todorovic@ymparisto.fi
+
 <br>
 
 ***
