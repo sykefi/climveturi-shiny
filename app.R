@@ -200,9 +200,9 @@ server <- function(input, output, session){
               "2" = "tan1", 
               "3" = "turquoise3")
     
-    scens <- c("1" = "Usean skenaarion keskiarvo (RCP4.5 pitoisuusskenaariolla)",
-               "2" = "Lämmin ja märkä (MIROC-ESM-CHEM globaali ilmastomalli RCP4.5 pitoisuusskenaariolla)",
-               "3" = "Kylmä (CESM1-CAM5 globaali ilmastomalli RCP2.6 pitoisuusskenaariolla)")
+    scens <- c("1" = "Usean skenaarion keskiarvo (RCP4.5 päästöskenaariolla)",
+               "2" = "Lämmin ja märkä (MIROC-ESM-CHEM globaali ilmastomalli RCP4.5 päästöskenaariolla)",
+               "3" = "Kylmä (CESM1-CAM5 globaali ilmastomalli RCP2.6 päästöskenaariolla)")
     
     times <- c("1" = "2010-2039",
                "2" = "2040-2069")
