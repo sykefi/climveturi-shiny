@@ -5,6 +5,7 @@
    
   }
 
+/* Text & title specifications */
 
 h4 { 
   font-family: Raleway; 
@@ -22,7 +23,7 @@ h3 {
   text-align: left;
   color: #000000;
   font-weight: 400; 
-  line-height: 15.4px; }
+  line-height: 20px; }
   
 p { 
   font-family: Raleway; 
@@ -33,20 +34,22 @@ p {
   line-height: 20px; } 
   
   
-/* Download button icon if needed: https://fontawesome.com/icons/download */
 
-.icon::before {
-    font-family: "Font Awesome 5 Free";
-    display: inline-block;
-    font-style: normal;
-    font-variant: normal;
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
-	font-weight: 900; /* solid */
-	font-size: 1.0em;
+/* Customized bsTooltip */
+.tooltip-inner {
+  width: 400px;
+  color: black;
+  background-color: white;
+  font-size: small;
+  border: 1px solid black;
 }
 
-.download::before {
-	content: "\f019";
-	
+.tippy-tooltip.custom-theme {
+  background-color: white !important;
+  color: black;
+  font-family: Raleway, sans-serif;
+  font-size: 18px;
 }
+
+
+

@@ -25,7 +25,9 @@ Päivittäisten virtaamien osalta tulokset on esitetty kolmella eri skenaariolla
 
 Tulvien osalta tulokset perustuvat 25 skenaarion joukkoon, joista on laskettu tulvien keskimääräinen sekä maksimi- ja minimimuutos.  
 
-Ilmastoskenaarioihin liittyy merkittävää epävarmuutta, jonka vuoksi on hyvä tarkastella useampaa skenaariota ja varautua erityyppisiin muutoksiin samanaikaisesti.
+Ilmastoskenaarioihin liittyy merkittävää epävarmuutta, jonka vuoksi on hyvä tarkastella useampaa skenaariota ja varautua erityyppisiin muutoksiin samanaikaisesti.  
+
+**Lisätietoa skenaarioista (RCP:t tähän).**
 
 
 
@@ -34,11 +36,10 @@ Ilmastoskenaarioihin liittyy merkittävää epävarmuutta, jonka vuoksi on hyvä
 ### Sovelluksen käyttö
 
 
-*Tämä osio varmaankin siirtyy 1 ja 2 välilehdille infolaatikkoihin/tooltipseihin.*  
-
 Sovelluksessa on kaksi välilehteä, joista toisessa visualisoidaan ilmastonmuutoksen vaikutuksia virtaamiin, ja toisessa tulviin.  
+<br>
 
-#### Muutokset virtaamissa
+#### Ilmastonmuutos ja virtaamat
 Ensimmäisellä välilehdellä käyttäjä voi valita sivupaneelista tarkasteluun vesialueen, ajanjakson ja skenaarion.  
 
 1. **Valitse vesistöalue alasvetovalikosta**. Kohteita on yhteensä 27. Visualisointiin on valittu vesistöjä, jotka ovat mahdollisimman vähän säännösteltyjä muutamaa poikkeusta lukuunottamatta. Näitä ovat Oulujoki, Merikoski ja Paatsjoki, Kaitakoski. Esimerkiksi Oulujoen säännöstely vaikuttaa virtaamaan.  
@@ -69,23 +70,24 @@ Valittujen muuttujien avulla piirtyy kuvaaja, jossa näkyvät:
 ##### **Taulukko**
 * Vuosittaiset keskiarvot, vuodenaikaiset keskiarvot, keskiyli- ja alivirtaamat (eli 30 vuoden jakson keskimääräinen ylin ja alin virtaama) 
 * tulosten tulkinnassa on hyvä muistaa, että osa ennustetusta kasvusta  on jo tapahtunut viimeisen kymmenen vuoden aikana, sillä referenssijaksona on käytetty vuosia 1981-2010.  
+<br>
+  
 
-
-#### Muutokset tulvissa
+#### Ilmastonmuutos ja tulvat
 Toisella välilehdellä käyttäjä voi valita sivupaneelista ajankohdan, ja tarkastella ilmastonmuutoksen vaikutusta kerran sadassa vuodessa tapahtuviin tulviin eri puolilla Suomea. Analyysissä on laskettu 25 eri ilmastoskenaarion keskimääräinen muutos referenssijaksoon 1981-2010 verrattuna sekä maksimi- ja minimimuutos (mahdollinen vaihteluväli). Tulvien muutokseen liittyy suurta epävarmuutta, mikä tulisi huomioida tulosten tulkinnassa.
 
 
-##### **Taulukot?**  
+##### **Taulukko**  
 
 
-##### **Kartta?**
+
+##### **Kartta**  
 Mitä näkyy, miten käytetään ym.
 
-<br>
 
 ***
 
-#### Hyödyllisiä linkkejä  
+### Hyödyllisiä linkkejä  
 
 Lisätietoa ClimVeTuri-hankkeesta: <a href="https://www.syke.fi/fi-FI/Tutkimus__kehittaminen/Tutkimus_ja_kehittamishankkeet/Hankkeet/ClimVeTuri/Vesienhoidon_ja_tulvariskien_hallinnan_y(49676)" target="_blank">Hankkeen sivu</a>  
 
@@ -98,9 +100,10 @@ Ajankohtaista vesitietoa Suomesta: <a href="https://www.vesi.fi/" target="_blank
 
 ***
 
-#### Yhteystiedot ja palaute
+### Yhteystiedot ja palaute
 
-Keräämme mieluusti palautetta liittyen sivuston sisältöön ja ominaisuuksiin. Mikäli sinulla on ajatuksia ja ideoita, niin klikkaa <a href="https://www.docs.google.com/forms/d/e/1FAIpQLSfzuXdt-UCY9ZlbeuyZovrnUQHaZdHaopblKJMhvc-6IauvtA/viewform?usp=sf_link" target="_blank">palautelinkkiä</a> ja jaa kommentit kanssamme.  
+Keräämme mieluusti palautetta liittyen sivuston sisältöön ja ominaisuuksiin.  
+Mikäli sinulla on ajatuksia ja ideoita, niin klikkaa <a href="https://www.docs.google.com/forms/d/e/1FAIpQLSfzuXdt-UCY9ZlbeuyZovrnUQHaZdHaopblKJMhvc-6IauvtA/viewform?usp=sf_link" target="_blank"><strong>palautelinkkiä</strong></a> ja jaa kommentit kanssamme.  
  
 Teknisissä asioissa voi olla yhteydessä sähköpostitse: sara.todorovic@ymparisto.fi
 
