@@ -153,10 +153,6 @@ server <- function(input, output, session){
     chg_dfs[[thisName]] <- chg_dfs[[thisName]][, c("Virtaama_ref", "Virtaama_ilm", "Muutos")]
     # colnames(chg_dfs[[thisName]]) <- c("VirtaamaRef_1981-2010", "VirtaamaIlmastonmuutos", "Muutosprosentti")
   })
-  output$table1_csv <- renderTable({
-    dataInput()
-  })
-  
   
   # Download link for table
   output$taulukko1_lataus <- downloadHandler(
@@ -204,9 +200,9 @@ server <- function(input, output, session){
               "2" = "tan1", 
               "3" = "turquoise3")
     
-    scens <- c("1" = "Usean skenaarion keskiarvo (RCP4.5 päästöskenaariolla)",
-               "2" = "Lämmin ja märkä (MIROC-ESM-CHEM globaali ilmastomalli RCP4.5 päästöskenaariolla)",
-               "3" = "Kylmä (CESM1-CAM5 globaali ilmastomalli RCP2.6 päästöskenaariolla)")
+    scens <- c("1" = "Usean skenaarion keskiarvo (RCP4.5 pitoisuusskenaariolla)",
+               "2" = "Lämmin ja märkä (MIROC-ESM-CHEM globaali ilmastomalli RCP4.5 pitoisuusskenaariolla)",
+               "3" = "Kylmä (CESM1-CAM5 globaali ilmastomalli RCP2.6 pitoisuusskenaariolla)")
     
     times <- c("1" = "2010-2039",
                "2" = "2040-2069")
@@ -420,27 +416,19 @@ server <- function(input, output, session){
                     } 
                   list(color = color)
                 })
-                
               ),
-              
               )
-    
-    
   })
+  
   
   # Simple table for downloading CSV, tab 2
   dataInput_flood <- reactive({
     tableData <- paste("flood", input$timeframe2, "nimi", sep="_")
     flood_list[[tableData]]
-    
-  })
-  output$table2_csv <- renderTable({
-    dataInput_flood()
   })
   
   # Download link for table
   output$taulukko2_lataus <- downloadHandler(
-    
     filename = function() {
       times <- c("1" = "2010-2039",
                  "2" = "2040-2069")
