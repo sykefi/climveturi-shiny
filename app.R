@@ -254,13 +254,16 @@ server <- function(input, output, session){
             axis.text.y = element_text(size=25),
             axis.title.y = element_text(size = 25),
             panel.background = element_blank(),
-            #panel.grid.major.y = element_line(colour="grey70"),
             axis.line = element_line(colour="grey"),
             legend.position ="bottom",
-            legend.justification = c("left", "top"),
+            legend.justification ="left",
             legend.margin = margin(),
             legend.background = element_blank(),
             legend.text = element_text(size=28),
+            legend.spacing.y = unit(0.2, "cm"),
+            legend.box = "vertical",
+            legend.box.just = 'left',
+            legend.key.size = unit(1, "cm"),
             legend.box.background = element_rect(alpha("white", 0.3), color =NA),
             plot.title = element_text(size=28))
  
