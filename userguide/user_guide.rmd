@@ -89,7 +89,7 @@ Taulukon otsikoita painamalla taulukon rivien järjestystä voi muuttaa.
 
 
 ##### **Kartta**  
-* Kartalla voi visulisoida valitun ajanjakson keskiarvo-, maksimi- ja minimimuutoksia kerran sadassa vuodessa (1/100a) esiintyviin tulviin. Punainen väri viittaa tulvien kasvuun ja sininen vähenemiseen. Pallon koko kuvaa muutoksen etäisyyttä nollasta (mitä suurempi pallo, sitä suurempi muutos).  
+* Kartalla voi visualisoida valitun ajanjakson keskiarvo-, maksimi- ja minimimuutoksia kerran sadassa vuodessa (1/100a) esiintyviin tulviin. Punainen väri viittaa tulvien kasvuun ja sininen vähenemiseen. Pallon koko kuvaa muutoksen etäisyyttä nollasta (mitä suurempi pallo, sitä suurempi muutos).  
 
 
 ***
