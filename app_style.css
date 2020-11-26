@@ -51,5 +51,10 @@ p {
   font-size: 18px;
 }
 
+.container-fluid {  
+  max-width: 12600px; /* or 950px */
+  
+}
+
 
 

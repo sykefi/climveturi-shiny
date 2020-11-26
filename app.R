@@ -9,7 +9,7 @@ rm(list = ls())
 
 
 # App version
-app_v <- "0012 (23.11.2020)"
+app_v <- "0013 (24.11.2020)"
 
 # Import libraries
 library(shiny)
@@ -116,12 +116,14 @@ server <- function(input, output, session){
               
               columns = list(
                 Virtaama_ref = colDef(
+                  minWidth = 110,
                   name = "Virtaama (\u33a5/s) referenssijakso",
                   header = with_tooltip("Virtaama (\u33a5/s) referenssijakso", "Referenssijakson virtaama-arvo valitulla ajanjaksolla.")
                   
                 ),
                 
                 Virtaama_ilm = colDef(
+                  minWidth = 110,
                   header = with_tooltip("Virtaama (\u33a5/s) ilmastonmuutos","Valitun ilmastonmuutosskenaarion simuloitu virtaama-arvo valitulla ajanjaksolla."),
                   style = function(value) {
                   list(fontWeight = "bold")
@@ -236,18 +238,20 @@ server <- function(input, output, session){
       scale_x_date(expand = c(0,0),labels = m_labels, breaks = as.Date(m_breaks))+
       
       # colour & legend settings
+      
+      scale_fill_manual(name = " ", values = cols,
+                        breaks = c("ref2"),
+                        labels = c("1981-2010 vaihteluväli (max-min)")) +
       scale_colour_manual(name = " ", values = cols,
                           breaks = c("ref1", as.character(input$scenario)),
                           labels = c("1981-2010  keskiarvo",
                                      paste(times[input$timeframe], "keskiarvo ja vaihteluväli", sep = " "))) +
-      scale_fill_manual(name = " ", values = cols,
-                        breaks = c("ref2"),
-                        labels = c("1981-2010 vaihteluväli (max-min)")) +
-      
-      guides(colour = guide_legend(nrow= 2,override.aes = list(linetype=c(1,1),
-                                                       shape = c(16, 16)))) +
       
       
+      guides(colour = guide_legend(order = 1, reverse = T, nrow= 2,override.aes = list(linetype=c(1,1),
+                                                       shape = c(16, 16))),
+             fill = guide_legend(order = 2))+
+
       # Style settings
       theme(axis.title.x=element_blank(),
             axis.text.x = element_text(size=25, face = "bold"),
@@ -259,13 +263,14 @@ server <- function(input, output, session){
             legend.justification ="left",
             legend.margin = margin(),
             legend.background = element_blank(),
-            legend.text = element_text(size=28),
+            legend.text = element_text(size=25),
             legend.spacing.y = unit(0.2, "cm"),
             legend.box = "vertical",
             legend.box.just = 'left',
+            legend.key.height = unit(1.2, "cm"),
             legend.key.size = unit(1, "cm"),
             legend.box.background = element_rect(alpha("white", 0.3), color =NA),
-            plot.title = element_text(size=28))
+            plot.title = element_text(size=25))
  
     
     # copy to global environment for saving
@@ -371,8 +376,7 @@ server <- function(input, output, session){
               columns = list(
                 Nimi = colDef(
                   name = "Vesistö",
-                  header = with_tooltip("Vesistö", "Mallinnetun virtaamapisteen sijainti. Järjestä aakkosjärjestykseen painamalla."),
-                  width = 200
+                  header = with_tooltip("Vesistö", "Mallinnetun virtaamapisteen sijainti. Järjestä aakkosjärjestykseen painamalla.")
                 ),
                 
                 Keskiarvo = colDef(
@@ -619,10 +623,9 @@ ui <- shinyUI(fluidPage(
                ),
                # Main panel
                mainPanel(
-                 fluidRow(
-                   column(12,
+                 
                           fluidRow(
-                            column(6,
+                            column(7,
                                    br(),
                                    # Graph
                                    ggiraphOutput("plo", 
@@ -644,7 +647,7 @@ ui <- shinyUI(fluidPage(
                                  p("Mallinnettujen virtaamapisteiden sijainti kartalla"),
                                  # Map
                                  leafletOutput("map1", height = 750, width = "100%"))))
-                 )),
+                 ,
              )
     ),
     
@@ -675,8 +678,8 @@ ui <- shinyUI(fluidPage(
                
                # Main panel
                mainPanel(
-                 fluidRow(
-                   column(12,
+                 # fluidRow(
+                 #   column(12,
                           fluidRow(
                           column(6,
                                  br(),
@@ -685,17 +688,17 @@ ui <- shinyUI(fluidPage(
                                  p("Taulukkoon ja karttaan on arvioitu 25 eri ilmastonmuutosskenaarion avulla, kuinka paljon 100-vuoden avovesitulva muuttuu valitulla ajanjaksolla suhteessa referenssijaksoon (1981-2010). Keskiarvo kertoo 25 skenaarion keskimääräisen muutoksen, maksimi on skenaarioiden suurin ja minimi pienin muutos. Huomioi, että arvioihin liittyy suurta epävarmuutta."),
                                  
                                  # Table
-                                 reactableOutput("table2", width = "100%")),
+                                 reactableOutput("table2", width ="100%")),
                           
-                          column(5,
+                          column(6,
                                  br(),
                                  strong("Visualisoi muutokset tulvissa valitsemalla taso kartalta."),
                                  p(span(strong("Punainen", style = "color:#b2182b")), "väri viittaa tulvien kasvuun ja ",
                                  span(strong("sininen", style ="color:#3275B8")), "vähenemiseen."),
                                  
                                  # Map
-                                 leafletOutput("map2", height=750, width = "100%"))))
-                 )),
+                                 leafletOutput("map2", height=750, width = "100%")))),
+                 # )),
              )
     ),
     
